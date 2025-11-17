@@ -4,11 +4,7 @@
 
 This artwork is built on our group’s shared **Space odyssey 1001** base code.  
 
-On top of this shared foundation, I designed a special **artistic music player** inspired by Steve Roach’s album **_Dreamtime Return_**:
-
-- All circles still use the group’s layered pattern system (outer / middle / inner rings).  
-- **Seven circles** are assigned as musical-note circles corresponding to C–D–E–F–G–A–B frequency bands.  
-- When music plays, these seven circles **pulse, rotate, and emit colored glows**, allowing the viewer to “see” the movement of sound.
+Inspired by the vinyl-style UI of modern music apps, I designed a unique artistic music player specifically for Steve Roach’s *Dreamtime Return*. When the music plays, the circular “vinyl record” comes to life—rotating, glowing, and shifting subtly—allowing viewers to *"see"* the movement and energy of the sound. 
 
 _Dreamtime Return_ (1988) is considered one of the landmark works of ambient electronic music. Steve Roach was inspired by the Australian desert, Aboriginal Dreamtime philosophy, and field experiences walking through the outback.  
 The album combines synthesizers, tribal percussion, and didgeridoo-like textures to create a vast, ritualistic soundscape.
