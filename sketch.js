@@ -12,6 +12,7 @@ let circleBasePalette;   // Base colours for the circles
 let patternPalette;      // Colours for patterns/details 
 let circles;             // Stores all circle objects
 let connectedNodes;      // Stores the circles selected as connection nodes (key "VIP" nodes)
+let backgroundDots;
 
 // =================== AUDIO VARIABLES (Individual Task) ===================
 // These variables are added for the individual animation task to make circles
