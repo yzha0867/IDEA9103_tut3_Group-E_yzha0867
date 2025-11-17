@@ -582,8 +582,10 @@ function drawHandDrawnCircle(r, fillCol, strokeCol, strokeW) {
 - p5.js Reference — https://p5js.org/reference/  
 - p5.sound FFT — https://p5js.
 
+
 **Musical**
 - Steve Roach – Dreamtime Return (Fortuna Records, 1988)
 
 
-This prototype is intended as an artistic homage that connects ambient electronic music, Aboriginal-inspired visual language and contemporary generative coding practice in p5.js.
+
+*This prototype is intended as an artistic homage that connects ambient electronic music, Aboriginal-inspired visual language and contemporary generative coding practice in p5.js.*
