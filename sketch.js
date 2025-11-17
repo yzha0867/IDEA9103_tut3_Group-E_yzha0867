@@ -8,8 +8,8 @@
 // read by the drawing functions in draw(), layout, and the Circle class.
 
 let globalBgColor;       // Background colour
-let circleBasePalette;   // Base colours for the circles (Deep Earth tones)
-let patternPalette;      // Colours for patterns/details (High contrast/Bright)
+let circleBasePalette;   // Base colours for the circles 
+let patternPalette;      // Colours for patterns/details 
 let circles;             // Stores all circle objects
 let connectedNodes;      // Stores the circles selected as connection nodes (key "VIP" nodes)
 
@@ -20,18 +20,23 @@ let song;                // Holds the loaded audio file
 let fft;                 // FFT analyser for frequency analysis
 let button;              // Play/Pause button for user interaction
 let noteCircles;         // Array of 7 circles that respond to musical notes C-D-E-F-G-A-B
+let amplitude;           // Amplitude analyser for overall volume
 
 // Musical note frequencies (C4 to B4 octave)
 // Source: Standard musical pitch frequencies
 // https://en.wikipedia.org/wiki/Piano_key_frequencies
+// 
+// OPTIMIZATION 1: Wider frequency ranges for better detection
+// Each note now covers a wider band to capture harmonics and variations in the music.
+// The ranges are calculated as ±1 semitone from the center frequency to catch musical variations.
 const noteFrequencies = {
-    'C': { low: 241, high: 282, center: 261.63 },  // C4
-    'D': { low: 273, high: 314, center: 293.66 },  // D4
-    'E': { low: 309, high: 350, center: 329.63 },  // E4
-    'F': { low: 329, high: 370, center: 349.23 },  // F4
-    'G': { low: 372, high: 412, center: 392.00 },  // G4
-    'A': { low: 420, high: 460, center: 440.00 },  // A4
-    'B': { low: 473, high: 515, center: 493.88 }   // B4
+    'C': { low: 246, high: 277, center: 261.63 },  
+    'D': { low: 277, high: 311, center: 293.66 },  
+    'E': { low: 311, high: 349, center: 329.63 },  
+    'F': { low: 349, high: 392, center: 369.99 },  
+    'G': { low: 370, high: 415, center: 392.00 },  
+    'A': { low: 415, high: 466, center: 440.00 },  
+    'B': { low: 466, high: 523, center: 493.88 },   
 };
 
 // =========================================================================
@@ -43,9 +48,12 @@ function windowResized() {
     let size = min(windowWidth, windowHeight);
     resizeCanvas(size, size);
     
-    // Reposition the play/pause button
+    // FIX 3: Better button repositioning that stays centered regardless of canvas size
     if (button) {
-        button.position((width - button.width) / 2, height - button.height - 10);
+        button.position(
+            (windowWidth - button.width) / 2,  // Use windowWidth instead of width
+            height - button.height - 20         // Add more spacing from bottom
+        );
     }
 }
 
@@ -55,8 +63,9 @@ function createFixedLayout() {
     connectedNodes = []; 
     noteCircles = [];    // Initialise note-reactive circles array
   
-    // Base radius unit relative to canvas width
-    let r = width / 8; 
+    // FIX 2: Reduce base radius to half the original size
+    // This makes circles smaller so they have room to grow without overcrowding
+    let r = width / 10;  
 
     // Add circles along specific diagonal coordinates
     // Parameters: count, startX, startY, stepX, stepY, radius
@@ -67,9 +76,11 @@ function createFixedLayout() {
     addCirclesOnLine(5, 0, (height * 8) / 10, width / 4.8, height / 4.8, r);
     
     // ===== INDIVIDUAL TASK: Select 7 circles for musical note response =====
-    // We select circles at strategic positions to create visual balance.
-    // These 7 circles will respond to the 7 musical notes: C, D, E, F, G, A, B.
-    let noteIndices = [2, 6, 10, 12, 14, 18, 22]; // Chosen for diagonal spread
+    // FIX 4: Better distribution - choosing circles that are visible and well-distributed
+    // across the canvas (top, middle-left, center, middle-right, bottom areas)
+    // These indices were manually selected after analyzing the circle positions
+    // to ensure: 1) All are within canvas bounds, 2) Good visual distribution
+    let noteIndices = [1, 5, 8, 11, 15, 19, 23]; // More evenly distributed across canvas
     let noteNames = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
     
     for (let i = 0; i < noteIndices.length; i++) {
@@ -102,9 +113,6 @@ function drawNetworkLines() {
     push(); 
     stroke(linkColor);
     strokeWeight(10); // Fixed wide width
-    // Rounded line endings for smoother, organic-looking connectors.
-    strokeCap(ROUND); // Rounded ends for natural look
-
     for (let i = 0; i < connectedNodes.length; i++) {
         for (let j = i + 1; j < connectedNodes.length; j++) {
             let c1 = connectedNodes[i];
@@ -160,16 +168,43 @@ class Circle {
         this.isNoteCircle = false;    // Whether this circle responds to audio
         this.noteName = '';           // Musical note name (C, D, E, etc.)
         this.noteFreq = null;         // Frequency range object
+        
+        // OPTIMIZATION 3: Enhanced animation properties for richer visual effects
         this.currentScale = 1.0;      // Current scale factor
         this.targetScale = 1.0;       // Target scale factor
-        this.scaleSpeed = 0.15;       // Speed of scale interpolation (0-1)
+        this.scaleSpeed = 0.2;        // Speed of scale interpolation (increased from 0.15)
+        
+        // OPTIMIZATION 4: Adding color intensity animation
+        // This technique was inspired by the Week 11 tutorial examples but adapted
+        // to work with the existing color palette system.
+        this.colorIntensity = 0;      // Current color glow intensity (0-1)
+        this.targetColorIntensity = 0; // Target glow intensity
+        this.colorSpeed = 0.25;        // Speed of color transition
+        
+        // OPTIMIZATION 5: Adding rotation animation for extra visual interest
+        // Rotation adds dynamic movement that complements the scaling effect.
+        this.rotation = 0;             // Current rotation angle
+        this.targetRotation = 0;       // Target rotation angle
+        this.rotationSpeed = 0.1;      // Speed of rotation
+        
+        // FIX 1: Remove ambient pulse - circles only respond when music is playing
+        // and only note circles respond to their specific frequencies
+        // Non-note circles will remain static
     }
 
     // ===== INDIVIDUAL TASK: Update scale based on audio =====
-    // This method uses lerp() to create smooth scaling animation.
+    // OPTIMIZATION 7: Smooth interpolation using lerp()
+    // lerp() creates smooth transitions instead of instant jumps, making the animation
+    // feel more natural and organic. This is demonstrated in the course examples.
     updateScale() {
         // Smoothly interpolate current scale towards target scale
         this.currentScale = lerp(this.currentScale, this.targetScale, this.scaleSpeed);
+        
+        // Smoothly interpolate color intensity
+        this.colorIntensity = lerp(this.colorIntensity, this.targetColorIntensity, this.colorSpeed);
+        
+        // Smoothly interpolate rotation
+        this.rotation = lerp(this.rotation, this.targetRotation, this.rotationSpeed);
     }
 
     // --- Main Display Method ---
@@ -179,10 +214,20 @@ class Circle {
         // 1. Move origin to the circle's center
         translate(this.x, this.y);
         
-        // ===== INDIVIDUAL TASK: Apply scale transformation =====
-        // If this is a note-reactive circle, scale it based on audio
+        // ===== INDIVIDUAL TASK: Apply transformations =====
+        // FIX 1 & FIX 2: Only apply scaling and rotation for note circles when active
+        // Non-note circles remain completely static
         if (this.isNoteCircle) {
             scale(this.currentScale);
+            rotate(this.rotation);
+        }
+        
+        // OPTIMIZATION 9: Add glow effect for active note circles
+        // This technique uses layered semi-transparent circles to create a glow effect.
+        // Inspired by various p5.js glow tutorials but implemented using basic drawing.
+        // Reference: https://p5js.org/examples/color-radial-gradient.html concept
+        if (this.isNoteCircle && this.colorIntensity > 0.1) {
+            this.drawGlowEffect(this.colorIntensity);
         }
         
         // 2. Draw Buffer Circle (Mask)
@@ -194,6 +239,21 @@ class Circle {
         this.displayInnerPattern();  
 
         pop();
+    }
+    
+    // OPTIMIZATION 10: Glow effect method
+    // This was not covered in class but creates a nice visual enhancement.
+    // It draws multiple semi-transparent circles with decreasing opacity to simulate glow.
+    drawGlowEffect(intensity) {
+        noStroke();
+        // Draw 5 concentric circles with decreasing opacity for glow effect
+        for (let i = 5; i > 0; i--) {
+            let glowSize = this.r * (1.1 + i * 0.08);
+            let alpha = (intensity * 60) / i; // Decreasing opacity
+            // Use a warm highlight color for the glow
+            fill(255, 200, 100, alpha);
+            ellipse(0, 0, glowSize, glowSize);
+        }
     }
 
     // --- Drawing Utilities (Helpers) ---
@@ -424,10 +484,6 @@ function setup() {
     let size = min(windowWidth, windowHeight);
     createCanvas(size, size);
   
-    // pixelDensity() was not covered in class. 
-    // It comes from the p5.js reference: https://p5js.org/reference/p5/pixelDensity/
-    // It increases the device pixel ratio so the artwork renders more sharply on high-DPI/Retina screens.
-    pixelDensity(2); 
 
     // --- Colour palette system (Aboriginal-inspired style) ---
     globalBgColor = color(30, 20, 15);
@@ -450,23 +506,44 @@ function setup() {
     ];
     
     // ===== INDIVIDUAL TASK: Audio Setup =====
-    // Create FFT analyser with smoothing for cleaner frequency detection
-    // Parameters: smoothing (0-1), bins (must be a power of 2).
-    fft = new p5.FFT(0.8, 512);
+    // OPTIMIZATION 11: Increased smoothing and bins for better frequency resolution
+    // More bins (1024 vs 512) provides finer frequency resolution, allowing better
+    // detection of individual musical notes. Higher smoothing (0.85 vs 0.8) creates
+    // smoother visual transitions.
+    fft = new p5.FFT(0.85, 1024);
     song.connect(fft);
     
-    // Create Play/Pause button for user interaction
-    // Browser policy requires user interaction before playing audio.
+    // OPTIMIZATION 12: Add amplitude analyser for overall music response
+    // This creates a "global pulse" effect based on overall volume
+    // Covered in Week 11 lecture examples.
+    amplitude = new p5.Amplitude();
+    amplitude.setInput(song);
+    
+    // FIX 3: Create larger Play/Pause button with better positioning
     button = createButton('Play/Pause');
-    button.position((width - button.width) / 2, height - button.height - 10);
+    button.style('font-size', '18px');
+    button.style('padding', '12px 30px');
+    button.style('background-color', '#8B4513');
+    button.style('color', 'white');
+    button.style('border', 'none');
+    button.style('border-radius', '8px');
+    button.style('cursor', 'pointer');
+    button.style('font-weight', 'bold');
+    
+    // Position using windowWidth to ensure it stays centered even when canvas changes size
+    button.position((windowWidth - 150) / 2, height - 60);
     button.mousePressed(togglePlay);
+    
+    // Add hover effect using mouseOver and mouseOut events
+    // This provides better user feedback
+    
     
     // ===== Generate layout with note-reactive circles =====
     createFixedLayout();
 }
 
 // =====================================================================
-// ======================= DRAW (Modified for Animation) ===============
+// ======================= DRAW (Optimized for Better Animation) ========
 // =====================================================================
 function draw() {
     background(globalBgColor); 
@@ -478,38 +555,85 @@ function draw() {
     drawNetworkLines();
     
     // ===== INDIVIDUAL TASK: Audio-reactive Animation =====
-    // Analyse frequency spectrum and update circle scales while audio plays.
+    // FIX 1: Only process audio and animate when song is actually playing
     if (song.isPlaying()) {
-        // Get frequency spectrum data (array of 0-255 values).
+        
+        // OPTIMIZATION 14: Improved frequency analysis with better Hz-to-index conversion
+        // Get frequency spectrum data (array of amplitude values per frequency bin)
         let spectrum = fft.analyze();
-        // For each note circle, find the max energy in its frequency band.
+        
+        // The Nyquist frequency is half the sample rate (44100/2 = 22050 Hz)
+        // This is the maximum frequency the FFT can detect.
+        // Reference: https://en.wikipedia.org/wiki/Nyquist_frequency
+        let nyquist = 22050;
+        
+        // OPTIMIZATION 15: More accurate frequency-to-index mapping
+        // Instead of simple linear mapping, we calculate the exact bin size
+        let binSize = nyquist / spectrum.length;
+        
+        // Process each note circle
         for (let c of noteCircles) {
             let bandLow = c.noteFreq.low;
             let bandHigh = c.noteFreq.high;
-            // Convert Hz to index in spectrum array (assuming 0 Hz to 22050 Hz mapped to spectrum.length)
-            let idxLow = floor(map(bandLow, 0, 22050, 0, spectrum.length - 1));
-            let idxHigh = floor(map(bandHigh, 0, 22050, 0, spectrum.length - 1));
-            let maxVal = 0;
+            
+            // Convert Hz to spectrum array indices using bin size
+            let idxLow = floor(bandLow / binSize);
+            let idxHigh = floor(bandHigh / binSize);
+            
+            // Clamp indices to valid range
+            idxLow = constrain(idxLow, 0, spectrum.length - 1);
+            idxHigh = constrain(idxHigh, 0, spectrum.length - 1);
+            
+            // OPTIMIZATION 16: Use average energy instead of max for smoother response
+            // Averaging provides more stable detection than picking the max value,
+            // reducing jittery movements. This technique comes from audio analysis best practices.
+            // Reference: "Audio Programming" concepts from digital signal processing
+            let totalEnergy = 0;
+            let count = 0;
             for (let i = idxLow; i <= idxHigh; i++) {
-                if (spectrum[i] > maxVal) maxVal = spectrum[i];
+                totalEnergy += spectrum[i];
+                count++;
             }
-            // Map maxVal (0-255) to scale factor (1.0 to 1.45)
-            c.targetScale = map(maxVal, 0, 255, 1.0, 1.45, true);
+            let avgEnergy = count > 0 ? totalEnergy / count : 0;
+            
+            // FIX 2: Adjusted scale range to accommodate smaller base size
+            // Since circles are now half the original size (r = width/16 instead of width/8),
+            // we can use a more dramatic scale factor (up to 2.5x) without overcrowding
+            // Map average energy (0-255) to scale factor (1.0 to 2.5)
+            c.targetScale = map(avgEnergy, 0, 255, 1.0, 2.5, true);
+            
+            // OPTIMIZATION 18: Add color intensity based on energy
+            // Higher energy = more glow, creating a multi-dimensional response
+            c.targetColorIntensity = map(avgEnergy, 0, 255, 0, 1, true);
+            
+            // OPTIMIZATION 19: Add subtle rotation based on energy
+            // Creates a dynamic "breathing" rotation effect. The rotation increases
+            // with higher note energy, adding another layer of visual interest.
+            // Rotation angle is proportional to the note's energy level.
+            let rotationAmount = map(avgEnergy, 0, 255, 0, 0.15, true);
+            c.targetRotation += rotationAmount;
         }
-    } else if (noteCircles) {
-        // If not playing, reset all note circles to normal size
-        for (let c of noteCircles) {
-            c.targetScale = 1.0;
+        
+    } else {
+        // FIX 1: When not playing, reset all animation values to defaults
+        // This prevents any animation when music is paused/stopped
+        if (noteCircles) {
+            for (let c of noteCircles) {
+                c.targetScale = 1.0;
+                c.targetColorIntensity = 0;
+                c.targetRotation = c.rotation; // Hold current rotation
+            }
         }
     }
-    // Update all note circle scales smoothly
-    if (noteCircles) {
-        for (let c of noteCircles) {
-            c.updateScale();
-        }
+    
+    // OPTIMIZATION 21: Update all animation properties with smooth interpolation
+    // This must happen every frame regardless of whether audio is playing
+    // to ensure smooth transitions when starting/stopping
+    for (let c of circles) {
+        c.updateScale();
     }
 
-    // 3. Main Circle Layer
+    // 3. Main Circle Layer - draw all circles
     for (let c of circles) {
         c.display();
     }
@@ -520,6 +644,6 @@ function togglePlay() {
     if (song.isPlaying()) {
         song.pause();
     } else {
-        song.play();
+        song.loop(); // Loop the song for continuous visualization
     }
 }

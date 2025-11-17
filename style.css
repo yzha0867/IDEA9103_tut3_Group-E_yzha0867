@@ -11,3 +11,10 @@ html, body {
   /* Set the colour to black to match the canvas */
   background-color: black;
 }
+
+#playButton {
+    font-size: 18px;
+    padding: 12px 30px;
+    background-color: #8B4513;
+   
+}
