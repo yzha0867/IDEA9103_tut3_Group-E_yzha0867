@@ -19,7 +19,6 @@ let connectedNodes;      // Stores the circles selected as connection nodes (key
 let songs = [];              // Array to hold all song objects
 let currentSongIndex = 0;   // Index of currently playing song
 let fft;                    // FFT analyser for frequency analysis
-let button;                 // Play/Pause button for user interaction
 let noteCircles;            // Array of 7 circles that respond to musical notes C-D-E-F-G-A-B
 let amplitude;              // Amplitude analyser for overall volume
 let playPauseButton;
@@ -28,8 +27,19 @@ let prevButton;
 
 // Song List - song filenames here 
 const SONG_LIST = [
-    'audio.MP3',
+    'Towards the Dream.MP3',
+    'The Continent.MP3',
+    'Songline.MP3',
+    'Aitribe Meets the Dream Ghost.MP3',
+    'A Circular Ceremon.MP3',
+    'The Other Side.MP3',
+    'Magnificent Gallery.MP3',
+    'Truth In Passing.MP3',
+    'Australian Dawn - The Quiet Earth Cries Inside.MP3',
 ]
+
+// Album information
+const ALBUM_NAME = 'Dreamtime Return';
 
 // Musical note frequencies (C4 to B4 octave)
 // Source: Standard musical pitch frequencies
@@ -44,9 +54,28 @@ const noteFrequencies = {
     'B': { low: 466, high: 523, center: 493.88 },   
 };
 
+// Color mapping for each musical note (rainbow spectrum)
+// Each note gets a unique glow color when activated
+const noteColors = {
+    'C': { r: 255, g: 50,  b: 50  },  // Red
+    'D': { r: 255, g: 140, b: 0   },  // Orange
+    'E': { r: 255, g: 220, b: 0   },  // Yellow
+    'F': { r: 50,  g: 255, b: 100 },  // Green
+    'G': { r: 0,   g: 200, b: 255 },  // Cyan
+    'A': { r: 80,  g: 80,  b: 255 },  // Blue
+    'B': { r: 200, g: 50,  b: 255 }   // Purple
+};
+
+
 // =========================================================================
 // ======================= Layout & Background =============================
 // =========================================================================
+// This section is responsible for the overall composition of the artwork.
+// It generates the fixed layout of circle centres, selects some of them as
+// "VIP" nodes for the network layer, draws the distance-based connection
+// lines between those nodes, and renders the random dot background texture
+// that sits underneath all circles.
+
 
 // --- Responsiveness ---
 function windowResized() {
@@ -100,15 +129,22 @@ function createFixedLayout() {
     
     // ===== INDIVIDUAL TASK: Select 7 circles for musical note response =====
 
-    let noteIndices = [1, 2, 3, 5, 6, 16, 17]; // More evenly distributed across canvas
+    let noteIndices = [15, 16, 2, 3, 6, 21, 4]; //
     let noteNames = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
     
     for (let i = 0; i < noteIndices.length; i++) {
-        let circle = circles[noteIndices[i]];
-        circle.isNoteCircle = true;           // Mark as note-reactive
-        circle.noteName = noteNames[i];       // Assign note name
-        circle.noteFreq = noteFrequencies[noteNames[i]]; // Assign frequency range
-        noteCircles.push(circle);             // Add to noteCircles array
+        if (noteIndices[i] < circles.length) {
+            let circle = circles[noteIndices[i]];
+            circle.isNoteCircle = true;
+            circle.noteName = noteNames[i];
+            circle.noteFreq = noteFrequencies[noteNames[i]];
+            
+            // Assign the unique glow color for this note
+            let noteColor = noteColors[noteNames[i]];
+            circle.glowColor = color(noteColor.r, noteColor.g, noteColor.b);
+            
+            noteCircles.push(circle);
+        }
     }
 }
 
@@ -118,28 +154,25 @@ function addCirclesOnLine(count, startX, startY, stepX, stepY, r) {
         let y = startY + stepY * i;
         let c = new Circle(x, y, r);
         circles.push(c);
-        // Randomly select 70% of circles to be "nodes" for connections
         if (random(1) < 0.7) {
             connectedNodes.push(c);
         }
     }
 }
 
-// --- Draw connecting lines ---
 function drawNetworkLines() {
-    let linkColor = color(240, 230, 200, 180); // Creamy colour, semi-transparent
-
-    // Use push/pop to isolate style settings for lines
+    let linkColor = color(240, 230, 200, 180);
     push(); 
     stroke(linkColor);
-    strokeWeight(10); // Fixed wide width
+    strokeWeight(10);
     for (let i = 0; i < connectedNodes.length; i++) {
         for (let j = i + 1; j < connectedNodes.length; j++) {
             let c1 = connectedNodes[i];
             let c2 = connectedNodes[j];
             // Compute Euclidean distance between two circle centers.
+            // dist() is from the p5.js reference: https://p5js.org/reference/p5/dist/
             let d = dist(c1.x, c1.y, c2.x, c2.y); // Calculate distance between two nodes
-            // Only connect nodes that are within a certain distance
+            // Only connect nodes that are within a certain distance, so that circles next to each other are connected
             if (d < width / 2.8) { 
                 line(c1.x, c1.y, c2.x, c2.y); 
             }
@@ -148,21 +181,30 @@ function drawNetworkLines() {
     pop();
 }
 
-// --- Background texture: dense random scattered white dots ---
-function drawBackgroundDots() {
-    push();
-    noStroke();
-  
-    let density = 0.004; // Controls how many dots per pixel area
+
+function generateBackgroundDots() {
+    backgroundDots = [];
+    let density = 0.004;
     let numDots = floor(width * height * density);
 
     for (let i = 0; i < numDots; i++) {
-        let x = random(width);
-        let y = random(height);
-        let dotSize = random(width * 0.002, width * 0.005);
-        let alpha = random(100, 200);
-        fill(255, 255, 255, alpha);
-        ellipse(x, y, dotSize);
+        let dot = {
+            x: random(width),
+            y: random(height),
+            size: random(width * 0.002, width * 0.005),
+            alpha: random(100, 200)
+        };
+        backgroundDots.push(dot);
+    }
+}
+
+function drawBackgroundDots() {
+    push();
+    noStroke();
+    
+    for (let dot of backgroundDots) {
+        fill(255, 255, 255, dot.alpha);
+        ellipse(dot.x, dot.y, dot.size);
     }
     pop();
 }
@@ -170,110 +212,123 @@ function drawBackgroundDots() {
 // ======================================================================
 // ======================== CIRCLE CLASS ================================
 // ======================================================================
+// The Circle class encapsulates all logic for drawing a single circular
+// motif. Each Circle instance stores its position, radius, and randomly
+// chosen pattern types for the outer, middle, and inner layers. The class
+// provides a display() method that renders the circle as a three-layer
+// structure (buffer, outer, middle, inner) using a variety of generative
+// pattern functions.
 
 class Circle {
+/*
+    Each Circle object randomly selects pattern types for its outer, middle,
+    and inner layers. This modular structure expands on OOP techniques,
+    enabling controlled variation through generative rules.
+*/
+
     constructor(x, y, r) {
         this.x = x;
         this.y = y;
         this.r = r; 
 
-        // Randomly assign pattern types
         this.outerPatternType = floor(random(4)); 
         this.middlePatternType = floor(random(4)); 
         this.innerPatternType = floor(random(2)); 
 
+        this.outerBaseColor = random(circleBasePalette);
+        this.outerPatternColor = random(patternPalette);
+        this.middleBaseColor = random(circleBasePalette);
+        this.middlePatternColor = random(patternPalette);
+        this.innerBaseColor = random(circleBasePalette);
+        this.innerPatternColor = random(patternPalette);
+
         this.irregularity = 0.02;
         
-        // ===== INDIVIDUAL TASK: Animation properties =====
-        this.isNoteCircle = false;    // Whether this circle responds to audio
-        this.noteName = '';           // Musical note name (C, D, E, etc.)
-        this.noteFreq = null;         // Frequency range object
+        this.isNoteCircle = false;
+        this.noteName = '';
+        this.noteFreq = null;
+        this.isActive = false;
         
-        // OPTIMIZATION 3: Enhanced animation properties for richer visual effects
-        this.currentScale = 1.0;      // Current scale factor
-        this.targetScale = 1.0;       // Target scale factor
-        this.scaleSpeed = 0.2;        // Speed of scale interpolation (increased from 0.15)
+        // Store the glow color for this note (will be set when assigned a note)
+        this.glowColor = null;  // Will be set in createFixedLayout()
         
-        // OPTIMIZATION 4: Adding color intensity animation
-        // This technique was inspired by the Week 11 tutorial examples but adapted
-        // to work with the existing color palette system.
-        this.colorIntensity = 0;      // Current color glow intensity (0-1)
-        this.targetColorIntensity = 0; // Target glow intensity
-        this.colorSpeed = 0.25;        // Speed of color transition
-        
-        // OPTIMIZATION 5: Adding rotation animation for extra visual interest
-        // Rotation adds dynamic movement that complements the scaling effect.
-        this.rotation = 0;             // Current rotation angle
-        this.targetRotation = 0;       // Target rotation angle
-        this.rotationSpeed = 0.1;      // Speed of rotation
-        
-        // FIX 1: Remove ambient pulse - circles only respond when music is playing
-        // and only note circles respond to their specific frequencies
-        // Non-note circles will remain static
+        this.currentScale = 1.0;
+        this.targetScale = 1.0;
+        this.scaleSpeed = 0.12;
+        this.colorIntensity = 0;
+        this.targetColorIntensity = 0;
+        this.colorSpeed = 0.15;
+        this.rotation = 0;
+        this.targetRotation = 0;
+        this.rotationSpeed = 0.05;
     }
 
-    // ===== INDIVIDUAL TASK: Update scale based on audio =====
-    // OPTIMIZATION 7: Smooth interpolation using lerp()
-    // lerp() creates smooth transitions instead of instant jumps, making the animation
-    // feel more natural and organic. This is demonstrated in the course examples.
     updateScale() {
-        // Smoothly interpolate current scale towards target scale
         this.currentScale = lerp(this.currentScale, this.targetScale, this.scaleSpeed);
-        
-        // Smoothly interpolate color intensity
         this.colorIntensity = lerp(this.colorIntensity, this.targetColorIntensity, this.colorSpeed);
-        
-        // Smoothly interpolate rotation
         this.rotation = lerp(this.rotation, this.targetRotation, this.rotationSpeed);
     }
 
-    // --- Main Display Method ---
     display() {
         push(); 
-        
-        // 1. Move origin to the circle's center
         translate(this.x, this.y);
         
-        // ===== INDIVIDUAL TASK: Apply transformations =====
-        // FIX 1 & FIX 2: Only apply scaling and rotation for note circles when active
-        // Non-note circles remain completely static
         if (this.isNoteCircle) {
             scale(this.currentScale);
             rotate(this.rotation);
         }
         
-        // OPTIMIZATION 9: Add glow effect for active note circles
-        // This technique uses layered semi-transparent circles to create a glow effect.
-        // Inspired by various p5.js glow tutorials but implemented using basic drawing.
-        // Reference: https://p5js.org/examples/color-radial-gradient.html concept
         if (this.isNoteCircle && this.colorIntensity > 0.1) {
             this.drawGlowEffect(this.colorIntensity);
         }
         
-        // 2. Draw Buffer Circle (Mask)
         this.drawHandDrawnCircle(this.r * 1.05, globalBgColor, null, 0);
-
-        // 3. Draw Patterns
         this.displayOuterPattern();  
         this.displayMiddlePattern(); 
         this.displayInnerPattern();  
-
         pop();
     }
     
-    // OPTIMIZATION 10: Glow effect method
-    // This was not covered in class but creates a nice visual enhancement.
-    // It draws multiple semi-transparent circles with decreasing opacity to simulate glow.
     drawGlowEffect(intensity) {
+        // Use note-specific color for glow effect
+        // Each note has its own unique color from the rainbow spectrum
+        
         noStroke();
-        // Draw 5 concentric circles with decreasing opacity for glow effect
-        for (let i = 5; i > 0; i--) {
-            let glowSize = this.r * (1.1 + i * 0.08);
-            let alpha = (intensity * 60) / i; // Decreasing opacity
-            // Use a warm highlight color for the glow
-            fill(255, 200, 100, alpha);
+        
+        // Use the note's unique glow color, or default to warm yellow if not set
+        let glowR, glowG, glowB;
+        if (this.glowColor) {
+            glowR = red(this.glowColor);
+            glowG = green(this.glowColor);
+            glowB = blue(this.glowColor);
+        } else {
+            // Fallback color (warm yellow-orange)
+            glowR = 255;
+            glowG = 200;
+            glowB = 100;
+        }
+        
+        // Draw multiple layers of glow with decreasing opacity
+        // Outer layers are larger and more transparent for soft glow effect
+        for (let i = 8; i > 0; i--) {
+            let glowSize = this.r * (1.15 + i * 0.12);  // Larger glow radius
+            let alpha = (intensity * 80) / i;            // Stronger glow
+            
+            // Add slight color variation to outer layers for more depth
+            let colorShift = (8 - i) * 5;
+            fill(
+                constrain(glowR + colorShift, 0, 255),
+                constrain(glowG + colorShift, 0, 255), 
+                constrain(glowB + colorShift, 0, 255),
+                alpha
+            );
             ellipse(0, 0, glowSize, glowSize);
         }
+        
+        //  Add bright inner core with note color
+        let coreAlpha = intensity * 120;
+        fill(glowR, glowG, glowB, coreAlpha);
+        ellipse(0, 0, this.r * 1.05, this.r * 1.05);
     }
 
     // --- Drawing Utilities (Helpers) ---
@@ -288,10 +343,8 @@ class Circle {
     drawIrregularBlob(rOffset, angle, size, col) {
         let x = cos(angle) * rOffset;
         let y = sin(angle) * rOffset;
-
         fill(col);
         noStroke();
-        
         push();
         translate(x, y); 
         rotate(random(TWO_PI));
@@ -306,28 +359,54 @@ class Circle {
         pop();
     }
 
+    // larger version of drawIrregularBlob() used to draw big circular motifs
     drawHandDrawnCircle(r, fillCol, strokeCol, strokeW) {
+    // draws a large base circle with a slightly jittered radius, 
+    // beginShape() + curveVertex(): described above to create an organic, hand-drawn outline.
+
+        //This function can be used to draw circles both with fill and without fill. 
         if (fillCol) fill(fillCol); else noFill();
         if (strokeCol) stroke(strokeCol); else noStroke();
         if (strokeW) strokeWeight(strokeW);
-
         beginShape();
-        let points = 50;
+        let points = 50; // if the number of points is too small, the circle will look like a polygon.
+        // if the number of points is too big, the circle will look like too perfect!
         for (let i = 0; i <= points; i++) {
             let angle = (TWO_PI / points) * i;
+             // Jitter the main radius
             let jitter = random(-r * 0.01, r * 0.01); 
             let radius = r + jitter;
             curveVertex(cos(angle) * radius, sin(angle) * radius);
         }
         endShape(CLOSE);
     }
-
+    
     // ================= OUTER PATTERNS =================
-    displayOuterPattern() {
-        let baseColor = random(circleBasePalette);
-        this.drawHandDrawnCircle(this.r, baseColor, color(0, 50), 2);
-        let patCol = random(patternPalette);
-
+     displayOuterPattern() {
+         // we want random color to increase the diversity of the outer patterns
+        let baseColor, patCol;
+        
+        if (this.isNoteCircle && this.isActive) {
+            baseColor = random(circleBasePalette);
+            patCol = random(patternPalette);
+        } else {
+            baseColor = this.outerBaseColor;
+            patCol = this.outerPatternColor;
+        }
+        
+        //  Use colored stroke for active note circles
+        let strokeColor = color(0, 50);  
+        let strokeW = 2;
+        
+        if (this.isNoteCircle && this.isActive && this.glowColor) {
+            // Use the note's glow color for the stroke, with higher intensity
+            strokeColor = this.glowColor;
+            strokeW = map(this.colorIntensity, 0, 1, 2, 6);  // Thicker stroke when active
+        }
+        
+        this.drawHandDrawnCircle(this.r, baseColor, strokeColor, strokeW);
+        
+        // draw the outer pattern based on the pattern type
         switch (this.outerPatternType) {
             case 0: this.drawOuterDotsPattern(patCol); break;
             case 1: this.drawOuterRadiatingLinesPattern(patCol); break;
@@ -336,56 +415,77 @@ class Circle {
         }
     }
 
+    // Pattern 0: Irregular Dots Ring
     drawOuterDotsPattern(col) {
         let dotSize = this.r * 0.07;  
         let dotSpacing = this.r * 0.09; 
+        // the dots ring starts from a radius of 0.65 times the radius of the circle
+        // and will end at 0.95 times the radius of the circle
+        // you can adjust all the parameters to achieve the effect you want
         for (let radius = this.r * 0.65; radius < this.r * 0.95; radius += dotSpacing) { 
-            let count = floor((TWO_PI * radius) / dotSpacing);
-            for (let i = 0; i < count; i++) {
+            let count = floor((TWO_PI * radius) / dotSpacing);  // calculate the number of dots in this radius
+            //so the density of dots on each circle is identical
+            for (let i = 0; i < count; i++) { // draw dots ring
                 let angle = (TWO_PI / count) * i;
                 this.drawIrregularBlob(radius, angle, dotSize, col);
             }
         }
     }
 
+    // Pattern 1: Radiating Lines (Sunburst)
+    // Uses rotate() to simplify drawing lines radiating from center
     drawOuterRadiatingLinesPattern(col) {
         let numLines = 40;
         stroke(col);
         strokeWeight(this.r * 0.015);
         strokeCap(ROUND);
-        
         for (let i = 0; i < numLines; i++) {
-            let angle = (TWO_PI / numLines) * i + random(-0.05, 0.05);
-            
+            let angle = (TWO_PI / numLines) * i + random(-0.05, 0.05);// add random jitter to each line
+
             push(); 
-            rotate(angle);
+            rotate(angle); // Rotate context
+            // Draw line along the X-axis
             line(this.r * 0.6, 0, this.r * 0.95, 0);
+            // Draw dot at the tip
             this.drawIrregularBlob(this.r * 0.95, 0, this.r * 0.03, col); 
             pop(); 
         }
     }
 
+     // Pattern 2: Striped Ring
     drawOuterStripedRingPattern(col) {
         noFill();
         stroke(col);
         let baseStrokeWeight = this.r * 0.025; 
-        let numRings = 2;
+        let numRings = 2; // we only want 2 rings to make the pattern look more brief
+        // You can increase the number to get a more dense ring pattern
         for (let i = 0; i < numRings; i++) {
             let radius = map(i, 0, numRings - 1, this.r * 0.65, this.r * 0.9);
+            // The map() function scales a value from one range to another.
+            // Here, it takes the loop counter 'i' (which goes from 0 to numRings - 1)
+            // and converts it to a corresponding radius value within the desired range
+            // (from this.r * 0.65 to this.r * 0.9).
             strokeWeight(baseStrokeWeight * random(0.8, 1.2)); 
             this.drawHandDrawnCircle(radius, null, col, null);
+            // Because we don't want a circle with fill, we pass 'null' for fillCol.
         }
     }
     
+    // Pattern 3: Radial Dash (Sine Wave Spring)
+    // Uses sin() to create a continuous wavy circumference
+    // This pattern also relies on beginShape() + curveVertex() to render the wavy outer contour as a continuous organic loop.
     drawOuterRadialDashPattern(col) {
         noFill(); 
         stroke(col); 
         strokeWeight(this.r * 0.025);
         let baseRadius = this.r * 0.73;
         let waveHeight = baseRadius * 0.30;
+        // waveHeight is the amplitude: how far the wave goes "in" and "out" from the baseRadius.
         let waveFrequency = 60;
-        let totalPoints = 240;   
-        
+        // waveFrequency controls how many full oscillations (bounces) happen around the circle.
+        let totalPoints = 240; 
+        // totalPoints determines the smoothness (resolution) of the shape. More points = smoother.
+        // we use sin to create a wavy effect, it looks like a spring   
         beginShape();
         for (let j = 0; j <= totalPoints; j++) {
             let angle = (TWO_PI / totalPoints) * j;
@@ -399,10 +499,18 @@ class Circle {
 
     // ================= MIDDLE PATTERNS =================
     displayMiddlePattern() {
-        let midBgColor = random(circleBasePalette);
+        let midBgColor, patCol;
+        
+        if (this.isNoteCircle && this.isActive) {
+            midBgColor = random(circleBasePalette);
+            patCol = random(patternPalette);
+        } else {
+            midBgColor = this.middleBaseColor;
+            patCol = this.middlePatternColor;
+        }
+        
         this.drawHandDrawnCircle(this.r * 0.55, midBgColor, null, 0);
-        let patCol = random(patternPalette);
-
+        
         switch (this.middlePatternType) {
             case 0: this.drawMiddleConcentricDotsPattern(patCol); break;
             case 1: this.drawMiddleUshapePattern(patCol); break;
@@ -411,6 +519,8 @@ class Circle {
         }
     }
 
+    // Pattern 0: Concentric Dots
+    // small version of drawOuterConcentricDotsPattern
     drawMiddleConcentricDotsPattern(col) {
         let dotSize = this.r * 0.04;
         for (let r = this.r * 0.2; r < this.r * 0.5; r += dotSize * 1.5) {
@@ -422,35 +532,40 @@ class Circle {
         }
     }
 
+    // Pattern 1: U-Shape Symbols
+    // Represents a person sitting in Indigenous art
     drawMiddleUshapePattern(col) {
         noFill();
         stroke(col);
         strokeWeight(this.r * 0.02);
-        let count = 8;
-        let r = this.r * 0.35;
-    
+        let count = 8; // The total number of U-shapes to draw.
+        let r = this.r * 0.35; // The radius of the orbit (the circle) on which the U-shapes will be placed.
         for (let i = 0; i < count; i++) {
             let angle = (TWO_PI / count) * i;
+            // Calculate the angle for this specific shape's position around the circle.
+            // (e.g., 0, 45, 90, 135 degrees...)
             push();
             rotate(angle); 
             translate(r, 0); 
             rotate(PI / 2); 
+            // arc() draws a semicircle from angle 0 to PI (180 degrees), creating a U-shape. 
             arc(0, 0, this.r * 0.15, this.r * 0.15, 0, PI); 
             pop();
         }
     }
 
+    // Pattern 2: Solid Rings
     drawMiddleSolidRings(col) {
         this.drawHandDrawnCircle(this.r * 0.45, col, null, 0);
-        let col2 = random(patternPalette);
-        this.drawHandDrawnCircle(this.r * 0.3, col2, null, 0);
+        this.drawHandDrawnCircle(this.r * 0.3, col, null, 0);
     }
 
+    // Pattern 3: Concentric Rings
     drawMiddleConcentricRings(col) {
         noFill();
         stroke(col);
         let baseStrokeWeight = this.r * 0.01; 
-        let numRings = 5;
+        let numRings = 5; // The total number of concentric rings to draw.
         for (let j = 0; j < numRings; j++) {
             let currentRadius = map(j, 0, numRings - 1, this.r * 0.3, this.r * 0.5);
             strokeWeight(baseStrokeWeight * random(0.8, 1.2)); 
@@ -468,15 +583,27 @@ class Circle {
 
     // ================= INNER PATTERNS =================
     displayInnerPattern() {
-        this.drawHandDrawnCircle(this.r * 0.25, random(circleBasePalette), null, 0);
-        let patCol = random(patternPalette);
+        let innerBgColor, patCol;
+        
+        if (this.isNoteCircle && this.isActive) {
+            innerBgColor = random(circleBasePalette);
+            patCol = random(patternPalette);
+        } else {
+            innerBgColor = this.innerBaseColor;
+            patCol = this.innerPatternColor;
+        }
+        
+        this.drawHandDrawnCircle(this.r * 0.25, innerBgColor, null, 0);
         
         if (this.innerPatternType === 0) {
+        // Simple large blob (Center Eye)
             this.drawIrregularBlob(0, 0, this.r * 0.15, patCol);
         } else {
             noFill();
             stroke(patCol);
             strokeWeight(this.r * 0.015);
+            // Here we again use beginShape() + curveVertex() to build a spiral-like
+            // path, applying the same hand-drawn curve technique to the inner core.
             beginShape();
             for (let i = 0; i < 50; i++) {
                 let r = map(i, 0, 50, 0, this.r * 0.2);
@@ -489,95 +616,79 @@ class Circle {
 }
 
 // =====================================================================
-// ======================= PRELOAD (Individual Task) ===================
+// ======================= PRELOAD =====================================
 // =====================================================================
-// The preload() function is required for loading external assets like audio files.
 function preload() {
-    // Load the audio file uploaded by the user
-    for (let i = 0; i < SONG_LIST.length; i++){
-       songs.push(loadSound('assets/' + SONG_LIST[i]));
+    if (SONG_LIST.length > 0) {
+        for (let i = 0; i < SONG_LIST.length; i++){
+           songs.push(loadSound('assets/' + SONG_LIST[i]));
+        }
     }
-   
 }
 
 // =====================================================================
 // ======================= SETUP =======================================
 // =====================================================================
 function setup() {
+    // Use min dimension to ensure square aspect ratio fits screen
     let size = min(windowWidth, windowHeight);
     createCanvas(size, size);
-  
 
-    // --- Colour palette system (Aboriginal-inspired style) ---
-    globalBgColor = color(30, 20, 15);
-
+    // --- 1. Colour palette system (Aboriginal-inspired style) ---
+    globalBgColor = color(30, 20, 15); // Deep, dark earth background
     circleBasePalette = [
-        color(90, 40, 20),
-        color(60, 30, 15),
-        color(40, 45, 35),
-        color(110, 60, 30),
-        color(20, 20, 20)
+        color(90, 40, 20),   //  (Red Ochre)
+        color(60, 30, 15),   //  (Deep Earth)
+        color(40, 45, 35),   //  (Bush Green)
+        color(110, 60, 30),  //  (Burnt Orange)
+        color(20, 20, 20)    //  (Charcoal)
     ];
+
 
     patternPalette = [
-        color(255, 255, 255),
-        color(255, 240, 200),
-        color(255, 215, 0),
-        color(255, 140, 80),
-        color(160, 180, 140),
-        color(200, 200, 210)
+        color(255, 255, 255), //  (Ceremony White)
+        color(255, 240, 200), //  (Cream)
+        color(255, 215, 0),   //  (Sun Yellow)
+        color(255, 140, 80),  //  (Bright Ochre)
+        color(160, 180, 140), //  (Sage)
+        color(200, 200, 210)  //  (Ash)
     ];
     
-    // ===== INDIVIDUAL TASK: Audio Setup =====
-    // OPTIMIZATION 11: Increased smoothing and bins for better frequency resolution
-    // More bins (1024 vs 512) provides finer frequency resolution, allowing better
-    // detection of individual musical notes. Higher smoothing (0.85 vs 0.8) creates
-    // smoother visual transitions.
     fft = new p5.FFT(0.9, 1024);
- 
-    //connect FFT to first song initially
-    if (songs.length > 0){
-        songs[currentSongIndex].connect(fft);
-    }
-    
-    // OPTIMIZATION 12: Add amplitude analyser for overall music response
-    // This creates a "global pulse" effect based on overall volume
-    // Covered in Week 11 lecture examples.
     amplitude = new p5.Amplitude();
-    if(songs.length > 0){
-         amplitude.setInput(songs[currentSongIndex]);
+    
+
+    if (songs.length > 0) {
+        for (let song of songs) {
+            song.connect(fft);
+        }
+        amplitude.setInput(songs[currentSongIndex]);
     }
    
-    
-    // ==== Create Player Button ====
-    // Previous button
     prevButton = createButton('⏮ Prev');
     prevButton.id('prevButton');
     prevButton.mousePressed(playPreviousSong);
     
-    // Play/Pause button
     playPauseButton = createButton('▶ Play');
     playPauseButton.id('playButton');
     playPauseButton.mousePressed(togglePlay);
     
-    // Next button
     nextButton = createButton('Next ⏭');
     nextButton.id('nextButton');
     nextButton.mousePressed(playNextSong);
     
-    // Position buttons
     repositionButtons();
-
-
-    // ===== Generate layout with note-reactive circles =====
     createFixedLayout();
+    generateBackgroundDots();
 }
 
-// ===== INDIVIDUAL TASK: Player Functions =====
+// =====================================================================
+// ======================= PLAYER FUNCTIONS ============================
+// =====================================================================
 
 function togglePlay() {
+    if (songs.length === 0) return;
     let currentSong = songs[currentSongIndex];
-
     if (currentSong.isPlaying()) {
         currentSong.pause();
         playPauseButton.html('▶ Play');
@@ -587,47 +698,42 @@ function togglePlay() {
     }
 }
 
-function playPreviousSong(){
-    //stop current song
-    if (songs[currentSongIndex].isPlaying()){
-        songs[currentSongIndex].stop();
-    }
-
-    //move to previous song
-    currentSongIndex--;
-    if(currentSongIndex < 0){
-        currentSongIndex = songs.length - 1 //Wrap to last song
-    }
-
-
-    // Connect new song to FFT and amplitude
-    songs[currentSongIndex].disconnect();
-    songs[currentSongIndex].connect(fft);
-    amplitude.setInput(songs[currentSongIndex]);
+function playPreviousSong() {
+    if (songs.length === 0) return;
     
-    // Play new song
-    songs[currentSongIndex].loop();
-    playPauseButton.html('⏸ Pause');
-}
-
-function playNextSong() {
     // Stop current song
     if (songs[currentSongIndex].isPlaying()) {
         songs[currentSongIndex].stop();
     }
     
-    // Move to next song
-    currentSongIndex++;
-    if (currentSongIndex >= songs.length) {
-        currentSongIndex = 0; // Wrap to first song
+    // Update index
+    currentSongIndex--;
+    if (currentSongIndex < 0) {
+        currentSongIndex = songs.length - 1;
     }
     
-    // Connect new song to FFT and amplitude
-    songs[currentSongIndex].disconnect();
-    songs[currentSongIndex].connect(fft);
+
     amplitude.setInput(songs[currentSongIndex]);
+    songs[currentSongIndex].loop();
+    playPauseButton.html('⏸ Pause');
+}
+
+function playNextSong() {
+    if (songs.length === 0) return;
     
-    // Play new song
+    // Stop current song
+    if (songs[currentSongIndex].isPlaying()) {
+        songs[currentSongIndex].stop();
+    }
+    
+    // Update index
+    currentSongIndex++;
+    if (currentSongIndex >= songs.length) {
+        currentSongIndex = 0;
+    }
+    
+ 
+    amplitude.setInput(songs[currentSongIndex]);
     songs[currentSongIndex].loop();
     playPauseButton.html('⏸ Pause');
 }
@@ -639,52 +745,58 @@ function draw() {
     background(globalBgColor); 
 
     // 1. Background Texture
+    // Draw random white dots that fill the canvas to create atmosphere
     drawBackgroundDots();
 
     // 2. Connection Layer (Songlines)
+    // Draw wide network lines between selected circle centres (VIP nodes)
+    // Rendered BEFORE circles so lines appear to go *under* them
     drawNetworkLines();
     
-    let currentSong = songs[currentSongIndex];
-    
-    if (currentSong && currentSong.isPlaying()) {
-        let spectrum = fft.analyze();
-        let nyquist = 22050;
-        let binSize = nyquist / spectrum.length;
+    if (songs.length > 0) {
+        let currentSong = songs[currentSongIndex];
         
-        for (let c of noteCircles) {
-            let bandLow = c.noteFreq.low;
-            let bandHigh = c.noteFreq.high;
-            let idxLow = floor(bandLow / binSize);
-            let idxHigh = floor(bandHigh / binSize);
-            idxLow = constrain(idxLow, 0, spectrum.length - 1);
-            idxHigh = constrain(idxHigh, 0, spectrum.length - 1);
+        if (currentSong && currentSong.isPlaying()) {
+            let spectrum = fft.analyze();
+            let nyquist = 22050;
+            let binSize = nyquist / spectrum.length;
             
-            let totalEnergy = 0;
-            let count = 0;
-            for (let i = idxLow; i <= idxHigh; i++) {
-                totalEnergy += spectrum[i];
-                count++;
-            }
-            let avgEnergy = count > 0 ? totalEnergy / count : 0;
-            
-            
-            if (avgEnergy > 50) {
-                c.targetScale = map(avgEnergy, 50, 255, 1.0, 1.8, true);
-                c.targetColorIntensity = map(avgEnergy, 50, 255, 0, 0.8, true);
-                let rotationAmount = map(avgEnergy, 50, 255, 0, 0.08, true);
-                c.targetRotation += rotationAmount;
-            } else {
-                // 能量低时快速回归默认状态
-                c.targetScale = 1.0;
-                c.targetColorIntensity = 0;
-            }
-        }
-    } else {
-        if (noteCircles) {
             for (let c of noteCircles) {
-                c.targetScale = 1.0;
-                c.targetColorIntensity = 0;
-                c.targetRotation = c.rotation;
+                let bandLow = c.noteFreq.low;
+                let bandHigh = c.noteFreq.high;
+                let idxLow = floor(bandLow / binSize);
+                let idxHigh = floor(bandHigh / binSize);
+                idxLow = constrain(idxLow, 0, spectrum.length - 1);
+                idxHigh = constrain(idxHigh, 0, spectrum.length - 1);
+                
+                let totalEnergy = 0;
+                let count = 0;
+                for (let i = idxLow; i <= idxHigh; i++) {
+                    totalEnergy += spectrum[i];
+                    count++;
+                }
+                let avgEnergy = count > 0 ? totalEnergy / count : 0;
+                
+                if (avgEnergy > 50) {
+                    c.isActive = true;
+                    c.targetScale = map(avgEnergy, 50, 255, 1.0, 1.8, true);
+                    c.targetColorIntensity = map(avgEnergy, 50, 255, 0, 0.8, true);
+                    let rotationAmount = map(avgEnergy, 50, 255, 0, 0.08, true);
+                    c.targetRotation += rotationAmount;
+                } else {
+                    c.isActive = false;
+                    c.targetScale = 1.0;
+                    c.targetColorIntensity = 0;
+                }
+            }
+        } else {
+            if (noteCircles) {
+                for (let c of noteCircles) {
+                    c.isActive = false;
+                    c.targetScale = 1.0;
+                    c.targetColorIntensity = 0;
+                    c.targetRotation = c.rotation;
+                }
             }
         }
     }
@@ -697,8 +809,10 @@ function draw() {
         c.display();
     }
     
-    // Display current song info
-    displaySongInfo();
+    if (songs.length > 0) {
+        displaySongInfo();
+    }
+    
 }
 
 function displaySongInfo() {
@@ -706,8 +820,22 @@ function displaySongInfo() {
     fill(255);
     noStroke();
     textAlign(CENTER, TOP);
+
+    //Album name at the top
+    textSize(16);
+    fill(255, 215, 0); // Gold
+    text(ALBUM_NAME, width / 2, 15);
+
+    //Track Number
     textSize(14);
-    text(`Track ${currentSongIndex + 1} / ${songs.length}`, width / 2, 20);
-    text(SONG_LIST[currentSongIndex], width / 2, 40);
+    fill(255); //White
+    text(`Track ${currentSongIndex + 1} / ${songs.length}`, width / 2, 38);
+
+    //Song title
+    textSize(13);
+    fill(255, 240, 200); //Cream 
+    text(SONG_LIST[currentSongIndex], width / 2, 58);
+
     pop();
 }
+
