@@ -100,6 +100,10 @@ The circular layout and soft lighting of modern vinyl-style music players influe
 
 ### 5.2 Steve Roach – *Dreamtime Return*
 
+![Album Cover](/assets/album%20cover.jpg)
+*Steve Roach — Dreamtime Return (1988)*
+
+
 The album itself was a major conceptual guide:
 
 - Long, evolving ambient textures suggested **slow, breathing movement** rather than fast or flashing effects.  
