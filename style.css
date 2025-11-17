@@ -12,9 +12,106 @@ html, body {
   background-color: black;
 }
 
+button {
+    /* Typography */
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    font-family: Arial, sans-serif;
+    
+    /* Spacing */
+    padding: 10px 20px;
+    
+    /* Visual Style */
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    
+    /* Interaction */
+    cursor: pointer;
+    
+    /* Smooth transitions */
+    transition: all 0.3s ease;
+}
+
+/* Play/Pause Button (Center) */
 #playButton {
-    font-size: 18px;
+    background-color: #8B4513;  /* Sienna brown */
     padding: 12px 30px;
-    background-color: #8B4513;
-   
+    font-size: 18px;
+}
+
+#playButton:hover {
+    background-color: #A0522D;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+#playButton:active {
+    background-color: #6B3410;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(0);
+}
+
+#playButton:focus {
+    outline: 2px solid #FFD700;
+    outline-offset: 2px;
+}
+
+/* Previous Button (Left) */
+#prevButton {
+    background-color: #654321;  /* Darker brown */
+    padding: 10px 20px;
+}
+
+#prevButton:hover {
+    background-color: #7D5A2F;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+#prevButton:active {
+    background-color: #4A3116;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(0);
+}
+
+#prevButton:focus {
+    outline: 2px solid #FFD700;
+    outline-offset: 2px;
+}
+
+/* Next Button (Right) */
+#nextButton {
+    background-color: #654321;  /* Darker brown */
+    padding: 10px 20px;
+}
+
+#nextButton:hover {
+    background-color: #7D5A2F;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+#nextButton:active {
+    background-color: #4A3116;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(0);
+}
+
+#nextButton:focus {
+    outline: 2px solid #FFD700;
+    outline-offset: 2px;
+}
+
+/* Disabled state for all buttons */
+button:disabled {
+    background-color: #3A2618;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+button:disabled:hover {
+    transform: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }

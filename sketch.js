@@ -16,19 +16,24 @@ let connectedNodes;      // Stores the circles selected as connection nodes (key
 // =================== AUDIO VARIABLES (Individual Task) ===================
 // These variables are added for the individual animation task to make circles
 // respond to specific musical notes in the audio file.
-let song;                // Holds the loaded audio file
-let fft;                 // FFT analyser for frequency analysis
-let button;              // Play/Pause button for user interaction
-let noteCircles;         // Array of 7 circles that respond to musical notes C-D-E-F-G-A-B
-let amplitude;           // Amplitude analyser for overall volume
+let songs = [];              // Array to hold all song objects
+let currentSongIndex = 0;   // Index of currently playing song
+let fft;                    // FFT analyser for frequency analysis
+let button;                 // Play/Pause button for user interaction
+let noteCircles;            // Array of 7 circles that respond to musical notes C-D-E-F-G-A-B
+let amplitude;              // Amplitude analyser for overall volume
+let playPauseButton;
+let nextButton;
+let prevButton;
+
+// Song List - song filenames here 
+const SONG_LIST = [
+    'audio.MP3',
+]
 
 // Musical note frequencies (C4 to B4 octave)
 // Source: Standard musical pitch frequencies
 // https://en.wikipedia.org/wiki/Piano_key_frequencies
-// 
-// OPTIMIZATION 1: Wider frequency ranges for better detection
-// Each note now covers a wider band to capture harmonics and variations in the music.
-// The ranges are calculated as ±1 semitone from the center frequency to catch musical variations.
 const noteFrequencies = {
     'C': { low: 246, high: 277, center: 261.63 },  
     'D': { low: 277, high: 311, center: 293.66 },  
@@ -48,23 +53,41 @@ function windowResized() {
     let size = min(windowWidth, windowHeight);
     resizeCanvas(size, size);
     
-    // FIX 3: Better button repositioning that stays centered regardless of canvas size
-    if (button) {
-        button.position(
-            (windowWidth - button.width) / 2,  // Use windowWidth instead of width
-            height - button.height - 20         // Add more spacing from bottom
+   // Reposition all buttons
+   repositionButtons();
+}
+
+function repositionButtons() {
+    if (playPauseButton && prevButton && nextButton) {
+        let buttonY = height - 60;
+        let spacing = 160; // Space between buttons
+        
+        // Center the play/pause button
+        playPauseButton.position((windowWidth - playPauseButton.width) / 2, buttonY);
+        
+        // Position prev button to the left
+        prevButton.position(
+            (windowWidth - playPauseButton.width) / 2 - spacing,
+            buttonY
+        );
+        
+        // Position next button to the right
+        nextButton.position(
+            (windowWidth - playPauseButton.width) / 2 + playPauseButton.width + spacing - nextButton.width,
+            buttonY
         );
     }
 }
 
+
 // --- Layout generation ---
 function createFixedLayout() {
-    circles = [];        // Initialise
+    circles = [];       
     connectedNodes = []; 
-    noteCircles = [];    // Initialise note-reactive circles array
-  
-    // FIX 2: Reduce base radius to half the original size
-    // This makes circles smaller so they have room to grow without overcrowding
+    noteCircles = [];    
+
+   
+    // Compared to the Group file, this makes circles smaller so they have room to grow without overcrowding
     let r = width / 10;  
 
     // Add circles along specific diagonal coordinates
@@ -76,11 +99,8 @@ function createFixedLayout() {
     addCirclesOnLine(5, 0, (height * 8) / 10, width / 4.8, height / 4.8, r);
     
     // ===== INDIVIDUAL TASK: Select 7 circles for musical note response =====
-    // FIX 4: Better distribution - choosing circles that are visible and well-distributed
-    // across the canvas (top, middle-left, center, middle-right, bottom areas)
-    // These indices were manually selected after analyzing the circle positions
-    // to ensure: 1) All are within canvas bounds, 2) Good visual distribution
-    let noteIndices = [1, 5, 8, 11, 15, 19, 23]; // More evenly distributed across canvas
+
+    let noteIndices = [1, 2, 3, 5, 6, 16, 17]; // More evenly distributed across canvas
     let noteNames = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
     
     for (let i = 0; i < noteIndices.length; i++) {
@@ -474,7 +494,10 @@ class Circle {
 // The preload() function is required for loading external assets like audio files.
 function preload() {
     // Load the audio file uploaded by the user
-    song = loadSound('assets/audio.MP3');
+    for (let i = 0; i < SONG_LIST.length; i++){
+       songs.push(loadSound('assets/' + SONG_LIST[i]));
+    }
+   
 }
 
 // =====================================================================
@@ -510,40 +533,107 @@ function setup() {
     // More bins (1024 vs 512) provides finer frequency resolution, allowing better
     // detection of individual musical notes. Higher smoothing (0.85 vs 0.8) creates
     // smoother visual transitions.
-    fft = new p5.FFT(0.85, 1024);
-    song.connect(fft);
+    fft = new p5.FFT(0.9, 1024);
+ 
+    //connect FFT to first song initially
+    if (songs.length > 0){
+        songs[currentSongIndex].connect(fft);
+    }
     
     // OPTIMIZATION 12: Add amplitude analyser for overall music response
     // This creates a "global pulse" effect based on overall volume
     // Covered in Week 11 lecture examples.
     amplitude = new p5.Amplitude();
-    amplitude.setInput(song);
+    if(songs.length > 0){
+         amplitude.setInput(songs[currentSongIndex]);
+    }
+   
     
-    // FIX 3: Create larger Play/Pause button with better positioning
-    button = createButton('Play/Pause');
-    button.style('font-size', '18px');
-    button.style('padding', '12px 30px');
-    button.style('background-color', '#8B4513');
-    button.style('color', 'white');
-    button.style('border', 'none');
-    button.style('border-radius', '8px');
-    button.style('cursor', 'pointer');
-    button.style('font-weight', 'bold');
+    // ==== Create Player Button ====
+    // Previous button
+    prevButton = createButton('⏮ Prev');
+    prevButton.id('prevButton');
+    prevButton.mousePressed(playPreviousSong);
     
-    // Position using windowWidth to ensure it stays centered even when canvas changes size
-    button.position((windowWidth - 150) / 2, height - 60);
-    button.mousePressed(togglePlay);
+    // Play/Pause button
+    playPauseButton = createButton('▶ Play');
+    playPauseButton.id('playButton');
+    playPauseButton.mousePressed(togglePlay);
     
-    // Add hover effect using mouseOver and mouseOut events
-    // This provides better user feedback
+    // Next button
+    nextButton = createButton('Next ⏭');
+    nextButton.id('nextButton');
+    nextButton.mousePressed(playNextSong);
     
-    
+    // Position buttons
+    repositionButtons();
+
+
     // ===== Generate layout with note-reactive circles =====
     createFixedLayout();
 }
 
+// ===== INDIVIDUAL TASK: Player Functions =====
+
+function togglePlay() {
+    let currentSong = songs[currentSongIndex];
+
+    if (currentSong.isPlaying()) {
+        currentSong.pause();
+        playPauseButton.html('▶ Play');
+    } else {
+        currentSong.loop(); 
+        playPauseButton.html('⏸ Pause');
+    }
+}
+
+function playPreviousSong(){
+    //stop current song
+    if (songs[currentSongIndex].isPlaying()){
+        songs[currentSongIndex].stop();
+    }
+
+    //move to previous song
+    currentSongIndex--;
+    if(currentSongIndex < 0){
+        currentSongIndex = songs.length - 1 //Wrap to last song
+    }
+
+
+    // Connect new song to FFT and amplitude
+    songs[currentSongIndex].disconnect();
+    songs[currentSongIndex].connect(fft);
+    amplitude.setInput(songs[currentSongIndex]);
+    
+    // Play new song
+    songs[currentSongIndex].loop();
+    playPauseButton.html('⏸ Pause');
+}
+
+function playNextSong() {
+    // Stop current song
+    if (songs[currentSongIndex].isPlaying()) {
+        songs[currentSongIndex].stop();
+    }
+    
+    // Move to next song
+    currentSongIndex++;
+    if (currentSongIndex >= songs.length) {
+        currentSongIndex = 0; // Wrap to first song
+    }
+    
+    // Connect new song to FFT and amplitude
+    songs[currentSongIndex].disconnect();
+    songs[currentSongIndex].connect(fft);
+    amplitude.setInput(songs[currentSongIndex]);
+    
+    // Play new song
+    songs[currentSongIndex].loop();
+    playPauseButton.html('⏸ Pause');
+}
+
 // =====================================================================
-// ======================= DRAW (Optimized for Better Animation) ========
+// ======================= DRAW ========================================
 // =====================================================================
 function draw() {
     background(globalBgColor); 
@@ -554,40 +644,21 @@ function draw() {
     // 2. Connection Layer (Songlines)
     drawNetworkLines();
     
-    // ===== INDIVIDUAL TASK: Audio-reactive Animation =====
-    // FIX 1: Only process audio and animate when song is actually playing
-    if (song.isPlaying()) {
-        
-        // OPTIMIZATION 14: Improved frequency analysis with better Hz-to-index conversion
-        // Get frequency spectrum data (array of amplitude values per frequency bin)
+    let currentSong = songs[currentSongIndex];
+    
+    if (currentSong && currentSong.isPlaying()) {
         let spectrum = fft.analyze();
-        
-        // The Nyquist frequency is half the sample rate (44100/2 = 22050 Hz)
-        // This is the maximum frequency the FFT can detect.
-        // Reference: https://en.wikipedia.org/wiki/Nyquist_frequency
         let nyquist = 22050;
-        
-        // OPTIMIZATION 15: More accurate frequency-to-index mapping
-        // Instead of simple linear mapping, we calculate the exact bin size
         let binSize = nyquist / spectrum.length;
         
-        // Process each note circle
         for (let c of noteCircles) {
             let bandLow = c.noteFreq.low;
             let bandHigh = c.noteFreq.high;
-            
-            // Convert Hz to spectrum array indices using bin size
             let idxLow = floor(bandLow / binSize);
             let idxHigh = floor(bandHigh / binSize);
-            
-            // Clamp indices to valid range
             idxLow = constrain(idxLow, 0, spectrum.length - 1);
             idxHigh = constrain(idxHigh, 0, spectrum.length - 1);
             
-            // OPTIMIZATION 16: Use average energy instead of max for smoother response
-            // Averaging provides more stable detection than picking the max value,
-            // reducing jittery movements. This technique comes from audio analysis best practices.
-            // Reference: "Audio Programming" concepts from digital signal processing
             let totalEnergy = 0;
             let count = 0;
             for (let i = idxLow; i <= idxHigh; i++) {
@@ -596,54 +667,47 @@ function draw() {
             }
             let avgEnergy = count > 0 ? totalEnergy / count : 0;
             
-            // FIX 2: Adjusted scale range to accommodate smaller base size
-            // Since circles are now half the original size (r = width/16 instead of width/8),
-            // we can use a more dramatic scale factor (up to 2.5x) without overcrowding
-            // Map average energy (0-255) to scale factor (1.0 to 2.5)
-            c.targetScale = map(avgEnergy, 0, 255, 1.0, 2.5, true);
             
-            // OPTIMIZATION 18: Add color intensity based on energy
-            // Higher energy = more glow, creating a multi-dimensional response
-            c.targetColorIntensity = map(avgEnergy, 0, 255, 0, 1, true);
-            
-            // OPTIMIZATION 19: Add subtle rotation based on energy
-            // Creates a dynamic "breathing" rotation effect. The rotation increases
-            // with higher note energy, adding another layer of visual interest.
-            // Rotation angle is proportional to the note's energy level.
-            let rotationAmount = map(avgEnergy, 0, 255, 0, 0.15, true);
-            c.targetRotation += rotationAmount;
+            if (avgEnergy > 50) {
+                c.targetScale = map(avgEnergy, 50, 255, 1.0, 1.8, true);
+                c.targetColorIntensity = map(avgEnergy, 50, 255, 0, 0.8, true);
+                let rotationAmount = map(avgEnergy, 50, 255, 0, 0.08, true);
+                c.targetRotation += rotationAmount;
+            } else {
+                // 能量低时快速回归默认状态
+                c.targetScale = 1.0;
+                c.targetColorIntensity = 0;
+            }
         }
-        
     } else {
-        // FIX 1: When not playing, reset all animation values to defaults
-        // This prevents any animation when music is paused/stopped
         if (noteCircles) {
             for (let c of noteCircles) {
                 c.targetScale = 1.0;
                 c.targetColorIntensity = 0;
-                c.targetRotation = c.rotation; // Hold current rotation
+                c.targetRotation = c.rotation;
             }
         }
     }
     
-    // OPTIMIZATION 21: Update all animation properties with smooth interpolation
-    // This must happen every frame regardless of whether audio is playing
-    // to ensure smooth transitions when starting/stopping
     for (let c of circles) {
         c.updateScale();
     }
 
-    // 3. Main Circle Layer - draw all circles
     for (let c of circles) {
         c.display();
     }
+    
+    // Display current song info
+    displaySongInfo();
 }
 
-// ===== INDIVIDUAL TASK: Play/Pause Button Handler =====
-function togglePlay() {
-    if (song.isPlaying()) {
-        song.pause();
-    } else {
-        song.loop(); // Loop the song for continuous visualization
-    }
+function displaySongInfo() {
+    push();
+    fill(255);
+    noStroke();
+    textAlign(CENTER, TOP);
+    textSize(14);
+    text(`Track ${currentSongIndex + 1} / ${songs.length}`, width / 2, 20);
+    text(SONG_LIST[currentSongIndex], width / 2, 40);
+    pop();
 }
