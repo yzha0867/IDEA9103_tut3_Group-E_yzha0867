@@ -4,10 +4,11 @@
 
 This artwork is built on our group’s shared **Space odyssey 1001** base code.  
 
-Inspired by the vinyl-style UI of modern music apps, I designed a unique artistic music player specifically for Steve Roach’s *Dreamtime Return*. When the music plays, the circular “vinyl record” comes to life—rotating, glowing, and shifting subtly—allowing viewers to *"see"* the movement and energy of the sound. (Technical details are explained later in the Mechanism section.)
+Inspired by the vinyl-style UI of modern music apps, I designed a unique artistic music player specifically for Steve Roach’s *Dreamtime Return*. When the music plays, the circular “vinyl record” comes to life—rotating, glowing, and shifting subtly—allowing viewers to **"see"** the movement and energy of the sound. (Technical details are explained later in the Mechanism section.)
 
 
 _Dreamtime Return_ (1988) is considered one of the landmark works of ambient electronic music. Steve Roach was inspired by the Australian desert, Aboriginal Dreamtime philosophy, and field experiences walking through the outback.  
+
 The album combines synthesizers, tribal percussion, and didgeridoo-like textures to create a vast, ritualistic soundscape.
 
 ---
