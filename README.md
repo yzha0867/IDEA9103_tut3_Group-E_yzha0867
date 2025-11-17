@@ -94,21 +94,20 @@ The animation focuses on the seven note circles. The following properties are an
 
 The circular layout and soft lighting of modern vinyl-style music players influenced:
 
-- The idea of treating the circle arrangement as a kind of **abstract turntable**.  
+- The idea of treating the circle arrangement as a kind of **abstract vinyl**.  
 - The use of gentle rotation and glowing highlights to convey the feeling of spinning media.  
-- The choice to present the album cover and track information as part of the visual experience.
 
 ### 5.2 Steve Roach – *Dreamtime Return*
 
 ![Album Cover](/assets/album%20cover.jpg)
 *Steve Roach — Dreamtime Return (1988)*
 
-
 The album itself was a major conceptual guide:
 
-- Long, evolving ambient textures suggested **slow, breathing movement** rather than fast or flashing effects.  
-- Rhythmic but non-aggressive percussive elements suggested subtle pulsing rather than hard, strobing visuals.  
-- The connection to Aboriginal Dreamtime concepts fits naturally with the group’s Aboriginal dot painting and Songline imagery.
+- Its long, evolving ambient textures suggested a **dreamlike, drifting atmosphere** rather than a purely literal or realistic representation.  
+- Layered, rhythmic elements with sharper transients inspired the use of **strobe-like highlights** in the visuals, echoing moments of impact or emphasis in the music.  
+- The blend of tribal, organic sounds with spacious electronic synthesis creates a **futuristic, sci-fi tone**, which I translated into glowing, pulsating circles that feel both ancient and otherworldly.
+- This fusion of Dreamtime-inspired themes and cosmic ambience aligns naturally with the group’s Aboriginal dot painting and Songline imagery, but pushes it toward a more surreal, speculative visual space.
 
 ### 5.3 Aboriginal Dot Painting and Songlines
 
