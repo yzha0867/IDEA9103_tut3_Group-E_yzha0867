@@ -85,28 +85,9 @@ The animation focuses on the seven note circles. The following properties are an
 
 ---
 
-## 5. Originality
+## 5. Inspiration and Reference Images
 
-While all group members share the same base composition (concentric circles, connecting lines, dot patterns), this prototype is unique in several ways:
-
-- It functions as an **audio-reactive music visualiser** specifically for the album *Dreamtime Return*.  
-- The animation is tightly linked to **specific pitch ranges** rather than generic volume or time.  
-- The coloured halos and gentle rotation give the impression of a **breathing vinyl record** mapped into an Aboriginal-inspired abstract landscape.  
-- Conceptually, it aims to create a **“synesthetic music player”** – allowing viewers to see pitch and energy as light, scale and motion.
-
-Compared with:
-
-- **Interaction-driven version** – focuses on user agency and playful manipulation of circles and connections.  
-- **Time-based version** – focuses on the temporal reveal of the composition layer by layer.  
-- **Perlin-noise version** – focuses on fluid, galaxy-like orbital motion and star-field dynamics.
-
-My version instead centres on **sound–image mapping**: the music itself becomes the timeline and the driver of the visuals.
-
----
-
-## 6. Inspiration and Reference Images
-
-### 6.1 Vintage Music Player UI
+### 5.1 Vintage Music Player UI
 
 ![Music Player Interface](/assets/music%20player.PNG)  
 *A music player interface with a vintage turntable aesthetic*
@@ -117,7 +98,7 @@ The circular layout and soft lighting of modern vinyl-style music players influe
 - The use of gentle rotation and glowing highlights to convey the feeling of spinning media.  
 - The choice to present the album cover and track information as part of the visual experience.
 
-### 6.2 Steve Roach – *Dreamtime Return*
+### 5.2 Steve Roach – *Dreamtime Return*
 
 The album itself was a major conceptual guide:
 
@@ -125,7 +106,7 @@ The album itself was a major conceptual guide:
 - Rhythmic but non-aggressive percussive elements suggested subtle pulsing rather than hard, strobing visuals.  
 - The connection to Aboriginal Dreamtime concepts fits naturally with the group’s Aboriginal dot painting and Songline imagery.
 
-### 6.3 Aboriginal Dot Painting and Songlines
+### 5.3 Aboriginal Dot Painting and Songlines
 
 The group base code already references:
 
@@ -137,16 +118,16 @@ By making only selected circles respond to music, my prototype treats them like 
 
 ---
 
-## 7. Technical Explanation
+## 6. Technical Explanation
 
-### 7.1 Audio Analysis with p5.FFT
+### 6.1 Audio Analysis with p5.FFT
 
 ```javascript
 fft = new p5.FFT(0.9, 1024);
 let spectrum = fft.analyze();
 ```
 
-### 7.2 Frequency Band Mapping
+### 6.2 Frequency Band Mapping
 
 ```javascript
 const noteFrequencies = {
@@ -160,7 +141,7 @@ const noteFrequencies = {
 };
 ```
 
-### 7.3 Glow Effect
+### 6.3 Glow Effect
 
 ```javascript
 function drawGlowEffect(baseRadius, color, intensity) {
@@ -174,7 +155,7 @@ function drawGlowEffect(baseRadius, color, intensity) {
 }
 ```
 
-### 7.4 Organic Circle Shapes
+### 6.4 Organic Circle Shapes
 
 ```javascript
 function drawHandDrawnCircle(r, fillCol, strokeCol, strokeW) {
@@ -195,7 +176,7 @@ function drawHandDrawnCircle(r, fillCol, strokeCol, strokeW) {
 }
 ```
 
-### 7.5 External Techniques Used
+### 6.5 External Techniques Used
 
 - p5.sound FFT & Amplitude (official documentation)  
 - Standard piano frequency tables (Wikipedia)  
@@ -203,7 +184,7 @@ function drawHandDrawnCircle(r, fillCol, strokeCol, strokeW) {
 ---
 
 
-## References and Resources
+## 7. References and Resources
 
 ### Technical References
 
