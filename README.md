@@ -191,7 +191,7 @@ The following techniques were not taught in the lecture/tutorial and come from e
     The glow rendering technique was developed with guidance from ChatGPT.
     *Used to make the “note circles” feel luminous and alive, matching the dream‑like quality of the music.*
 
-  The assistant explained how to simulate a soft radial glow by:
+  The AI assistant explained how to simulate a soft radial glow by:
     - Drawing multiple semi‑transparent ellipses of increasing radius  
     - Reducing alpha per layer to create a smooth falloff  
     - Introducing slight colour shifts for depth  
@@ -210,10 +210,9 @@ The following techniques were not taught in the lecture/tutorial and come from e
 ## 7. References and Resources
 
 ### Technical References
-- [p5.sound FFT Documentation](https://p5js.org/reference/#/p5.FFT)
 - [Piano Key Frequencies - Wikipedia](https://en.wikipedia.org/wiki/Piano_key_frequencies)
-- [beginShape() Documentation](https://p5js.org/reference/p5/beginShape/)
-- [curveVertex() Documentation](https://p5js.org/reference/p5/curveVertex/)
+- [beginShape()](https://p5js.org/reference/p5/beginShape/)
+- [curveVertex()](https://p5js.org/reference/p5/curveVertex/)
 
 ### Cultural References
 - Australian Aboriginal Art and Dreamtime concepts
