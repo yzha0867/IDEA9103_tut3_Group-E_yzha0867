@@ -22,26 +22,8 @@ The album combines synthesizers, tribal percussion, and didgeridoo-like textures
 
 ## How to Interact with the Artwork
 
-1. **Start the Experience**
-   - Click the **"▶ Play"** button at the bottom of the canvas
-   - Wait for the music to begin loading and playing (may take a few seconds)
-   - The button will change to **"⏸ Pause"** when playback starts
-
-2. **Navigate the Album**
-   - Click **"⏮ Prev"** to play the previous track
-   - Click **"Next ⏭"** to play the next track
-   - There are 9 tracks total from *Dreamtime Return*
-
-3. **Watch the Magic Happen**
-   - Once music plays, observe how specific circles respond to different musical notes
-   - Seven circles are mapped to musical notes C, D, E, F, G, A, and B
-   - Each note has its own unique rainbow color (red, orange, yellow, green, cyan, blue, purple)
-   - Circles will glow, scale up, rotate, and change colors when their corresponding frequencies are detected
-
-4. **Visual Information**
-   - Album name displays at the top center
-   - Track number and song title appear below
-   - All visual elements are responsive to window resizing
+Click the **Play** button and wait for the music to start.  
+Use **Prev** and **Next** to switch between tracks.
 
 ---
 
@@ -60,7 +42,7 @@ Unlike other group members' approaches, my animation is driven entirely by **rea
 | **Time-based Animation** | Progressive reveal animation on page load | Circles appear gradually from innermost to outermost ring after refresh |
 | **Perlin Noise** | Organic, fluid movement patterns | Circles orbit around each other with stars floating; positions and colors randomize on refresh |
 
-**My unique contribution:** Real-time audio reactivity with frequency-specific circle responses, creating a direct visual representation of the music's harmonic content.
+
 
 ---
 
@@ -385,3 +367,223 @@ Potential additions for future versions:
 ---
 
 *This project is an artistic homage to indigenous Australian culture and Steve Roach's pioneering ambient music. It represents a fusion of traditional art forms with modern generative techniques, creating a bridge between ancient wisdom and contemporary technology.*
+# Individual Prototype for Major Assignment of IDEA9103
+
+## 1. Project Overview
+
+This artwork is built on our group’s shared **Space Odyssey 1001** base code.
+
+On top of this shared foundation, I designed a special **artistic music player** inspired by Steve Roach’s album **_Dreamtime Return_**:
+
+- All circles still use the group’s layered pattern system (outer / middle / inner rings).  
+- **Seven circles** are assigned as musical-note circles corresponding to the C–D–E–F–G–A–B frequency bands.  
+- When music plays, these seven circles **pulse, rotate, and emit coloured glows**, allowing the viewer to “see” the movement of sound.
+
+_Dreamtime Return_ (1988) is widely regarded as a landmark ambient electronic album. Steve Roach drew inspiration from the Australian desert, Aboriginal Dreamtime concepts, and field experiences walking through the outback. The album combines synthesizers, tribal percussion, and didgeridoo-like textures to create a vast, ritual-like soundscape.
+
+---
+
+![Dreamtime Return Album Cover](/assets/album%20cover.jpg)  
+*Album cover that inspired this prototype*
+
+---
+
+## 2. How to Interact
+
+Click the **Play** button and wait for the music to start.  
+Use **Prev** and **Next** to switch between tracks.
+
+No additional input is required – once the music is playing, you can sit back and watch how the circles respond.
+
+---
+
+## 3. Mechanism of My Work
+
+My individual prototype modifies the group work by introducing an **audio-driven animation system** using `p5.FFT` and `p5.Amplitude` from the p5.sound library.
+
+- Seven specific circles are designated as **note circles**.  
+- Each note circle is mapped to a musical note in the fourth octave (C4–B4), using approximate frequency ranges (e.g. C ≈ 261.63 Hz, A ≈ 440 Hz).  
+- During playback of tracks from *Dreamtime Return*, the sketch analyses the current audio spectrum in real time and calculates the energy in each note’s frequency band.  
+- The visual behaviour of each note circle (scale, rotation, glow intensity) is then driven by this energy.
+
+This is different from other group members’ mechanisms:
+
+- One version is **interaction-driven**: clicking on empty areas creates new circles; clicking existing circles triggers breathing animations; clicking two different circles connects them and evolves their visual state.
+- One version is **time-based**: after refresh, circles appear gradually from the innermost ring to the outermost, creating a temporal unfolding of the composition.
+- One version uses **Perlin noise**: circles orbit around each other smoothly and stars float in the background; with each refresh, circle positions and colours change.
+
+In contrast, my version **does not rely on user interaction, time sequences, or noise fields**. Instead, it turns the music itself into the animation engine.
+
+---
+
+## 4. Animation
+
+The animation focuses on the seven note circles. The following properties are animated:
+
+### 4.1 Scale (Breathing Effect)
+
+- Each note circle has a `currentScale` and `targetScale`.  
+- When the energy in its frequency band exceeds a threshold, its `targetScale` is set higher (e.g. from 1.0 up to about 1.8).  
+- `currentScale` smoothly interpolates towards `targetScale` using `lerp()`, creating a breathing or pulsing effect.
+
+### 4.2 Glow Intensity and Colour
+
+- Each note is assigned a unique colour, following a rainbow mapping:
+
+  - C – Red  
+  - D – Orange  
+  - E – Yellow  
+  - F – Green  
+  - G – Cyan  
+  - A – Blue  
+  - B – Purple  
+
+- When a note circle is active, a custom `drawGlowEffect()` function draws multiple translucent ellipses around it.  
+- The glow radius and alpha depend on the note’s energy, so louder notes produce stronger halos.
+
+### 4.3 Rotation
+
+- Each note circle has a `rotation` and a `targetRotation`.  
+- The average energy in its frequency band is mapped to a small rotation increment.  
+- Over time, this makes active circles gently rotate, as if they were spinning on a turntable.
+
+### 4.4 Pattern Recolouring
+
+- For active note circles, the colours of the outer/middle/inner rings are occasionally re-sampled from the existing palette.  
+- This creates subtle shifts in the internal patterns during strong musical moments.
+
+### 4.5 Static Elements
+
+- Non-note circles remain static and keep the original group composition.  
+- Background dots and Songline-like connecting lines are also static, acting as a calm backdrop for the animated note circles.
+
+---
+
+## 5. Originality
+
+While all group members share the same base composition (concentric circles, connecting lines, dot patterns), this prototype is unique in several ways:
+
+- It functions as an **audio-reactive music visualiser** specifically for the album *Dreamtime Return*.  
+- The animation is tightly linked to **specific pitch ranges** rather than generic volume or time.  
+- The coloured halos and gentle rotation give the impression of a **breathing vinyl record** mapped into an Aboriginal-inspired abstract landscape.  
+- Conceptually, it aims to create a **“synesthetic music player”** – allowing viewers to see pitch and energy as light, scale and motion.
+
+Compared with:
+
+- **Interaction-driven version** – focuses on user agency and playful manipulation of circles and connections.  
+- **Time-based version** – focuses on the temporal reveal of the composition layer by layer.  
+- **Perlin-noise version** – focuses on fluid, galaxy-like orbital motion and star-field dynamics.
+
+My version instead centres on **sound–image mapping**: the music itself becomes the timeline and the driver of the visuals.
+
+---
+
+## 6. Inspiration and Reference Images
+
+### 6.1 Vintage Music Player UI
+
+![Music Player Interface](/assets/music%20player.PNG)  
+*A music player interface with a vintage turntable aesthetic*
+
+The circular layout and soft lighting of modern vinyl-style music players influenced:
+
+- The idea of treating the circle arrangement as a kind of **abstract turntable**.  
+- The use of gentle rotation and glowing highlights to convey the feeling of spinning media.  
+- The choice to present the album cover and track information as part of the visual experience.
+
+### 6.2 Steve Roach – *Dreamtime Return*
+
+The album itself was a major conceptual guide:
+
+- Long, evolving ambient textures suggested **slow, breathing movement** rather than fast or flashing effects.  
+- Rhythmic but non-aggressive percussive elements suggested subtle pulsing rather than hard, strobing visuals.  
+- The connection to Aboriginal Dreamtime concepts fits naturally with the group’s Aboriginal dot painting and Songline imagery.
+
+### 6.3 Aboriginal Dot Painting and Songlines
+
+The group base code already references:
+
+- **Concentric circles** as meeting places or waterholes  
+- **Lines** as paths or Songlines  
+- **Dots** as landscape texture and storytelling elements  
+
+By making only selected circles respond to music, my prototype treats them like **instruments** or **nodes on a sonic map**, reinforcing the idea of a musical journey through a symbolic landscape.
+
+---
+
+## 7. Technical Explanation
+
+### 7.1 Audio Analysis with p5.FFT
+
+```javascript
+fft = new p5.FFT(0.9, 1024);
+let spectrum = fft.analyze();
+```
+
+### 7.2 Frequency Band Mapping
+
+```javascript
+const noteFrequencies = {
+  C: { low: 246, high: 277, center: 261.63 },
+  D: { low: 277, high: 311, center: 293.66 },
+  E: { low: 311, high: 349, center: 329.63 },
+  F: { low: 349, high: 392, center: 349.23 },
+  G: { low: 370, high: 415, center: 392.00 },
+  A: { low: 415, high: 466, center: 440.00 },
+  B: { low: 466, high: 523, center: 493.88 }
+};
+```
+
+### 7.3 Glow Effect
+
+```javascript
+function drawGlowEffect(baseRadius, color, intensity) {
+  for (let i = 8; i > 0; i--) {
+    let glowSize = baseRadius * (1.15 + i * 0.12);
+    let alpha = (intensity * 80) / i;
+    fill(color.r, color.g, color.b, alpha);
+    noStroke();
+    ellipse(0, 0, glowSize, glowSize);
+  }
+}
+```
+
+### 7.4 Organic Circle Shapes
+
+```javascript
+function drawHandDrawnCircle(r, fillCol, strokeCol, strokeW) {
+  push();
+  fill(fillCol);
+  stroke(strokeCol);
+  strokeWeight(strokeW);
+  beginShape();
+  let points = 50;
+  for (let i = 0; i <= points; i++) {
+    let angle = (TWO_PI / points) * i;
+    let jitter = random(-r * 0.01, r * 0.01);
+    let radius = r + jitter;
+    curveVertex(cos(angle) * radius, sin(angle) * radius);
+  }
+  endShape(CLOSE);
+  pop();
+}
+```
+
+### 7.5 External Techniques Used
+
+- p5.sound FFT & Amplitude (official documentation)  
+- Standard piano frequency tables (Wikipedia)  
+
+---
+
+## 8. References
+
+*Technical*
+- p5.js Reference — https://p5js.org/reference/  
+- p5.sound FFT — https://p5js.
+
+*Musical*
+- Steve Roach – Dreamtime Return (Fortuna Records, 1988)
+
+
+This prototype is intended as an artistic homage that connects ambient electronic music, Aboriginal-inspired visual language and contemporary generative coding practice in p5.js.
