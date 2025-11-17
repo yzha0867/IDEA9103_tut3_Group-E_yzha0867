@@ -85,10 +85,6 @@ The following techniques were not taught in the lecture/tutorial and come from e
 ## 7. References and Resources
 
 ### Technical References
-
-- Music theory resources for note frequency bands  
-- Generative art techniques for glow effects and irregular shapes  
-- [p5.js Reference](https://p5js.org/reference/)
 - [p5.sound FFT Documentation](https://p5js.org/reference/#/p5.FFT)
 - [Piano Key Frequencies - Wikipedia](https://en.wikipedia.org/wiki/Piano_key_frequencies)
 - [beginShape() Documentation](https://p5js.org/reference/p5/beginShape/)
