@@ -15,10 +15,6 @@ The album combines synthesizers, tribal percussion, and didgeridoo-like textures
 
 ---
 
-
-
----
-
 ## How to Interact with the Artwork
 
 Click the **Play** button and wait for the music to start.  
@@ -59,7 +55,7 @@ Unlike other group members' approaches, my animation is driven entirely by **rea
 2. **Steve Roach's "Dreamtime Return" (1988)**
    
    ![Dreamtime Return Album Cover](/assets/album%20cover.jpg)
-*Album cover that inspired this project*
+*Album that inspired this project*
    
    This groundbreaking ambient/electronic album draws from Australian Aboriginal culture and the concept of "Dreamtime" - the indigenous Australian understanding of the world's creation and spiritual realm. The album blends:
    - Atmospheric synthesizers
