@@ -15,8 +15,7 @@ The album combines synthesizers, tribal percussion, and didgeridoo-like textures
 
 ---
 
-![Dreamtime Return Album Cover](/assets/album%20cover.jpg)
-*Album cover that inspired this project*
+
 
 ---
 
@@ -51,12 +50,16 @@ Unlike other group members' approaches, my animation is driven entirely by **rea
 ### Primary Inspirations
 
 1. **Vintage Vinyl Record Players**
+   
    ![Music Player Interface](/assets/music%20player.PNG)
    *A QQ Music player interface showing a vintage turntable aesthetic*
    
    The nostalgic aesthetic of analog music playback inspired the earthy color palette and organic circular patterns. The tactile, physical nature of vinyl records influenced the hand-drawn, imperfect quality of the circles.
 
 2. **Steve Roach's "Dreamtime Return" (1988)**
+   
+   ![Dreamtime Return Album Cover](/assets/album%20cover.jpg)
+*Album cover that inspired this project*
    
    This groundbreaking ambient/electronic album draws from Australian Aboriginal culture and the concept of "Dreamtime" - the indigenous Australian understanding of the world's creation and spiritual realm. The album blends:
    - Atmospheric synthesizers
@@ -66,7 +69,7 @@ Unlike other group members' approaches, my animation is driven entirely by **rea
    
    The album's fusion of ancient indigenous wisdom with modern electronic music perfectly aligns with visualizing traditional Aboriginal dot painting through contemporary code-based art.
 
-3. **Aboriginal Dot Painting Traditions**
+1. **Aboriginal Dot Painting Traditions**
    
    The circular motifs, concentric rings, and connecting lines ("songlines") are direct references to indigenous Australian art, where:
    - Circles represent meeting places, waterholes, or campsites
