@@ -89,7 +89,7 @@ The animation focuses on the seven note circles. The following properties are an
 
 ### 5.1 Vintage Music Player UI
 
-![Music Player Interface](/assets/music%20player.PNG)  
+![Music Player Interface](/assets/musicPlay.png)  
 *A music player interface with a vintage turntable aesthetic*
 
 The circular layout and soft lighting of modern vinyl-style music players influenced:
