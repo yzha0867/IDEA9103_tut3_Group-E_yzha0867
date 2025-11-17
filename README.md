@@ -183,6 +183,11 @@ function drawHandDrawnCircle(r, fillCol, strokeCol, strokeW) {
 
 The following techniques were not taught in the lecture/tutorial and come from external references or original experimentation:
 
+- **Mapping frequency bands to FFT bins (Nyquist-based calculation)**  
+    Derived from external explanations of FFT bin resolution such as StuffonmyMind’s article on audio‑reactive visuals.  
+    This method estimates `binSize = Nyquist / spectrum.length` to convert real‑world frequency ranges (e.g., 261–277 Hz for C4) into FFT index ranges.  
+     *Used so that each note circle responds accurately to its corresponding musical frequency band, ensuring precise audio‑driven animation rather than relying on arbitrary FFT indices.*
+
 - **Note‑frequency mapping (C–B ranges)**  
     Derived from external music theory resources and Wikipedia’s piano frequency tables.  
     *Used so that each visual element corresponds to a meaningful musical pitch range, making the animation musically grounded.*
@@ -210,6 +215,7 @@ The following techniques were not taught in the lecture/tutorial and come from e
 ## 7. References and Resources
 
 ### Technical References
+- [Mapping frequency bands to FFT bins (binSize = Nyquist / spectrum.length)](https://sangarshanan.com/2024/11/05/visualising-music/)
 - [Piano Key Frequencies - Wikipedia](https://en.wikipedia.org/wiki/Piano_key_frequencies)
 - [beginShape()](https://p5js.org/reference/p5/beginShape/)
 - [curveVertex()](https://p5js.org/reference/p5/curveVertex/)
