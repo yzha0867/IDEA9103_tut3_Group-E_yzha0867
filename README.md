@@ -1,127 +1,3 @@
-# Individual Prototype for Major Assignment of IDEA9103
-
-## 1. Project Overview
-
-This artwork is built on our group’s shared **Space odyssey 1001** base code.  
-
-Inspired by the vinyl-style UI of modern music apps, I designed a unique artistic music player specifically for Steve Roach’s *Dreamtime Return*. When the music plays, the circular “vinyl record” comes to life—rotating, glowing, and shifting subtly—allowing viewers to *"see"* the movement and energy of the sound. (Technical details are explained later in the Mechanism section.)
-
-
-_Dreamtime Return_ (1988) is considered one of the landmark works of ambient electronic music. Steve Roach was inspired by the Australian desert, Aboriginal Dreamtime philosophy, and field experiences walking through the outback.  
-The album combines synthesizers, tribal percussion, and didgeridoo-like textures to create a vast, ritualistic soundscape.
-
----
-
-
-
-## 2. How to Interact with the Artwork
-
-Click the **Play** button and wait for the music to start.  
-Use **Prev** and **Next** to switch between tracks.
-
-No additional input is required - once the music is playing, you can sit back and watch how the circles respond.
-
----
-
-## 3. Machanism of My Work
-
-My individual prototype modifies the group work by introducing an **audio-driven animation system** using `p5.FFT` and `p5.Amplitude` from the p5.sound library.
-
-- Seven specific circles are designated as **note circles**.  
-- Each note circle is mapped to a musical note in the fourth octave (C4–B4), using approximate frequency ranges (e.g. C ≈ 261.63 Hz, A ≈ 440 Hz).  
-- During playback of tracks from *Dreamtime Return*, the sketch analyses the current audio spectrum in real time and calculates the energy in each note’s frequency band.  
-- The visual behaviour of each note circle (scale, rotation, glow intensity) is then driven by this energy.
-
-This is different from other group members’ mechanisms:
-
-- One version is **interaction**: clicking on empty areas creates new circles; clicking existing circles triggers breathing animations; clicking two different circles connects them and evolves their visual state.
-- One version is **time-based**: after refresh, circles appear gradually from the innermost ring to the outermost, creating a temporal unfolding of the composition.
-- One version uses **Perlin noise**: circles orbit around each other smoothly and stars float in the background; with each refresh, circle positions and colours change.
-
-In contrast, my version **does not rely on user interaction, time sequences, or noise fields**. Instead, it turns the music itself into the animation engine.
-
----
-
-## 4. Animation
-
-The animation focuses on the seven note circles. The following properties are animated:
-
-### 4.1 Scale (Breathing Effect)
-
-- Each note circle has a `currentScale` and `targetScale`.  
-- When the energy in its frequency band exceeds a threshold, its `targetScale` is set higher (e.g. from 1.0 up to about 1.8).  
-- `currentScale` smoothly interpolates towards `targetScale` using `lerp()`, creating a breathing or pulsing effect.
-
-### 4.2 Glow Intensity and Colour
-
-- Each note is assigned a unique colour, following a rainbow mapping:
-
-  - C – Red  
-  - D – Orange  
-  - E – Yellow  
-  - F – Green  
-  - G – Cyan  
-  - A – Blue  
-  - B – Purple  
-
-- When a note circle is active, a custom `drawGlowEffect()` function draws multiple translucent ellipses around it.  
-- The glow radius and alpha depend on the note’s energy, so louder notes produce stronger halos.
-
-### 4.3 Rotation
-
-- Each note circle has a `rotation` and a `targetRotation`.  
-- The average energy in its frequency band is mapped to a small rotation increment.  
-- Over time, this makes active circles gently rotate, as if they were spinning on a turntable.
-
-### 4.4 Pattern Recolouring
-
-- For active note circles, the colours of the outer/middle/inner rings are occasionally re-sampled from the existing palette.  
-- This creates subtle shifts in the internal patterns during strong musical moments.
-
-### 4.5 Static Elements
-
-- Non-note circles remain static and keep the original group composition.  
-- Background dots and Songline-like connecting lines are also static, acting as a calm backdrop for the animated note circles.
-
----
-
-## 5. Inspiration and Reference Images
-
-### 5.1 Vintage Music Player UI
-
-![Music Player Interface](/assets/musicPlay.png)  
-*A music player interface with a vintage turntable aesthetic*
-
-The circular layout and soft lighting of modern vinyl-style music players influenced:
-
-- The idea of treating the circle arrangement as a kind of **abstract turntable**.  
-- The use of gentle rotation and glowing highlights to convey the feeling of spinning media.  
-- The choice to present the album cover and track information as part of the visual experience.
-
-### 5.2 Steve Roach – *Dreamtime Return*
-
-![Album Cover](/assets/album%20cover.jpg)
-*Steve Roach — Dreamtime Return (1988)*
-
-
-The album itself was a major conceptual guide:
-
-- Long, evolving ambient textures suggested **slow, breathing movement** rather than fast or flashing effects.  
-- Rhythmic but non-aggressive percussive elements suggested subtle pulsing rather than hard, strobing visuals.  
-- The connection to Aboriginal Dreamtime concepts fits naturally with the group’s Aboriginal dot painting and Songline imagery.
-
-### 5.3 Aboriginal Dot Painting and Songlines
-
-The group base code already references:
-
-- **Concentric circles** as meeting places or waterholes  
-- **Lines** as paths or Songlines  
-- **Dots** as landscape texture and storytelling elements  
-
-By making only selected circles respond to music, my prototype treats them like **instruments** or **nodes on a sonic map**, reinforcing the idea of a musical journey through a symbolic landscape.
-
----
-
 ## 6. Technical Explanation
 
 ### 6.1 Audio Analysis with p5.FFT
@@ -182,8 +58,26 @@ function drawHandDrawnCircle(r, fillCol, strokeCol, strokeW) {
 
 ### 6.5 External Techniques Used
 
-- p5.sound FFT & Amplitude (official documentation)  
-- Standard piano frequency tables (Wikipedia)  
+The following techniques were not taught in the lecture/tutorial and come from external references or original experimentation:
+
+- **Note‑frequency mapping (C–B ranges)**  
+  Derived from external music theory resources and Wikipedia’s piano frequency tables.  
+  *Used so that each visual element corresponds to a meaningful musical pitch range, making the animation musically grounded.*
+
+- **Multi‑layer glow effect (`drawGlowEffect`)**  
+  The glow rendering technique was developed with guidance from ChatGPT.  
+  The assistant explained how to simulate a soft radial glow by:
+    - Drawing multiple semi‑transparent ellipses of increasing radius  
+    - Reducing alpha per layer to create a smooth falloff  
+    - Introducing slight colour shifts for depth  
+    - Placing a bright “core” layer at the centre  
+  *Used to make the “note circles” feel luminous and alive, matching the dream‑like quality of the music.*
+
+- **Hand‑drawn / sketch‑style circles (`beginShape()` + `curveVertex()`)**  
+  Adapted from p5.js reference examples to create organic, uneven outlines.  
+  *Used to avoid perfect digital geometry and better match the natural, human‑made aesthetic of Aboriginal‑inspired patterns.*
+- **Multi-layer concentric pattern system**  
+  Built upon the group’s custom base code.
 
 ---
 
@@ -192,6 +86,8 @@ function drawHandDrawnCircle(r, fillCol, strokeCol, strokeW) {
 
 ### Technical References
 
+- Music theory resources for note frequency bands  
+- Generative art techniques for glow effects and irregular shapes  
 - [p5.js Reference](https://p5js.org/reference/)
 - [p5.sound FFT Documentation](https://p5js.org/reference/#/p5.FFT)
 - [Piano Key Frequencies - Wikipedia](https://en.wikipedia.org/wiki/Piano_key_frequencies)
@@ -210,4 +106,3 @@ function drawHandDrawnCircle(r, fillCol, strokeCol, strokeW) {
 
 
 *This prototype is intended as an artistic homage that connects ambient electronic music, Aboriginal-inspired visual language and contemporary generative coding practice in p5.js.*
-
