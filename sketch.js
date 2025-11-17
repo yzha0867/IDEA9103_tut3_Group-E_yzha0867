@@ -45,7 +45,10 @@ const ALBUM_NAME = 'Dreamtime Return';
 // Musical note frequencies (C4 to B4 octave)
 // Source: Standard musical pitch frequencies
 // https://en.wikipedia.org/wiki/Piano_key_frequencies
-const noteFrequencies = {
+const noteFrequencies = { 
+// For each note we define:
+// - low / high: frequency band in Hz used to sample FFT energy for that note
+// - center: the canonical pitch frequency, mainly kept here for clarity
     'C': { low: 246, high: 277, center: 261.63 },  
     'D': { low: 277, high: 311, center: 293.66 },  
     'E': { low: 311, high: 349, center: 329.63 },  
@@ -143,7 +146,8 @@ function createFixedLayout() {
             let circle = circles[noteIndices[i]];
             circle.isNoteCircle = true;
             circle.noteName = noteNames[i];
-            circle.noteFreq = noteFrequencies[noteNames[i]];
+            circle.noteFreq = noteFrequencies[noteNames[i]]; // Each note circle now knows both its visual location and its target
+            // frequency band in the FFT spectrum (via noteFrequencies above).
             
             // Assign the unique glow color for this note
             let noteColor = noteColors[noteNames[i]];
@@ -634,6 +638,8 @@ class Circle {
 // ========================== PRELOAD ==================================
 // =====================================================================
 function preload() {
+    // Load the entire album into memory so that switching tracks is instant.
+    // this sketch uses SONG_LIST to build a full album playlist (one p5.SoundFile per track).
     if (SONG_LIST.length > 0) {
         for (let i = 0; i < SONG_LIST.length; i++){
            songs.push(loadSound('assets/' + SONG_LIST[i]));
@@ -669,14 +675,22 @@ function setup() {
         color(200, 200, 210)  //  (Ash)
     ];
     
+    // Create a high-resolution FFT analyser:
+    //  - smoothing = 0.9 for a less "jittery" spectrum over time
+    //  - 1024 bins for finer frequency resolution than the basic examples
     fft = new p5.FFT(0.9, 1024);
+
+    // Separate amplitude analyser for overall loudness if needed
     amplitude = new p5.Amplitude();
     
 
     if (songs.length > 0) {
+        // Connect every track in the album to the same FFT analyser.
+        // This lets the visual system keep working even when we change songs.
         for (let song of songs) {
             song.connect(fft);
         }
+        // Amplitude is only listening to the currently active song.
         amplitude.setInput(songs[currentSongIndex]);
     }
    
@@ -747,8 +761,11 @@ function playNextSong() {
         currentSongIndex = 0;
     }
     
- 
+    // Re-route the amplitude analyser so it listens to the new track.
+    // FFT already has all songs connected, but Amplitude only follows one at a time.
     amplitude.setInput(songs[currentSongIndex]);
+
+    // Loop the new track so the visualisation can run continuously like an ambient player.
     songs[currentSongIndex].loop();
     playPauseButton.html('⏸ Pause');
 }
@@ -777,18 +794,22 @@ function draw() {
             // External DSP-style extension:
             // Use Nyquist frequency and spectrum length to map a target frequency band (C–B ranges)
             // to FFT bin indices, so we can approximate the energy of each musical note.
-            //Referenc: https://sangarshanan.com/2024/11/05/visualising-music/
-            let nyquist = 22050;
+            //Referenc: https://sangarshanan.com/2024/11/05/visualising-music/                
+            let nyquist = 22050; // Half of 44.1 kHz sample rate
             let binSize = nyquist / spectrum.length;
             
             for (let c of noteCircles) {
+                // Convert the note's [low, high] frequency band into FFT bin indices.
                 let bandLow = c.noteFreq.low;
                 let bandHigh = c.noteFreq.high;
                 let idxLow = floor(bandLow / binSize);
                 let idxHigh = floor(bandHigh / binSize);
+
+                // Safety: clamp index range to the spectrum array bounds.
                 idxLow = constrain(idxLow, 0, spectrum.length - 1);
                 idxHigh = constrain(idxHigh, 0, spectrum.length - 1);
                 
+                // Average the energy within this band to get a smoother response per note.
                 let totalEnergy = 0;
                 let count = 0;
                 for (let i = idxLow; i <= idxHigh; i++) {
@@ -797,8 +818,10 @@ function draw() {
                 }
                 let avgEnergy = count > 0 ? totalEnergy / count : 0;
                 
+                // Threshold around ~50 avoids constant flickering from very low noise levels.
                 if (avgEnergy > 50) {
                     c.isActive = true;
+                    // Map energy to visual scale and glow intensity, clamped using 'true'.
                     c.targetScale = map(avgEnergy, 50, 255, 1.0, 1.8, true);
                     c.targetColorIntensity = map(avgEnergy, 50, 255, 0, 0.8, true);
                     let rotationAmount = map(avgEnergy, 50, 255, 0, 0.08, true);
