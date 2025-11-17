@@ -130,7 +130,12 @@ function createFixedLayout() {
     
     // ===== INDIVIDUAL TASK: Select 7 circles for musical note response =====
 
-    let noteIndices = [15, 16, 2, 3, 6, 21, 4]; //
+    // All circles are pushed into circles[] in sequence within createFixedLayout(), 
+    // i.e. their order in the array is the order in which they were created.
+    // The indices below were chosen manually after inspecting the layout,
+    // so that the 7 note circles are visually balanced and spread across the canvas.
+    let noteIndices = [15, 16, 2, 3, 6, 21, 4]; 
+
     let noteNames = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
     
     for (let i = 0; i < noteIndices.length; i++) {
@@ -288,6 +293,17 @@ class Circle {
         pop();
     }
     
+    /*
+        This glow rendering method was developed with guidance from ChatGPT.
+        The technique simulates a soft, luminous halo by:
+          - Layering multiple semi‑transparent ellipses of increasing size
+          - Gradually reducing alpha for smooth falloff
+          - Adding slight colour shifts to enhance depth
+          - Drawing a bright “core” layer at the centre
+        This glow effect is used to make each musical note visually “come alive,” 
+        matching the dreamy, luminous atmosphere of *Dreamtime Return* and giving the note‑circles a clear, 
+        expressive identity during playback.
+    */
     drawGlowEffect(intensity) {
         // Use note-specific color for glow effect
         // Each note has its own unique color from the rainbow spectrum
@@ -330,7 +346,7 @@ class Circle {
         ellipse(0, 0, this.r * 1.05, this.r * 1.05);
     }
 
-    // --- Drawing Utilities (Helpers) ---
+    // --- Drawing Utilities ---
     /*
         Many of the custom shapes in this sketch use beginShape() together with
         curveVertex() to build smooth, organic outlines instead of perfect geometric primitives. 
@@ -380,7 +396,7 @@ class Circle {
         endShape(CLOSE);
     }
     
-    // ================= OUTER PATTERNS =================
+    // ========================= OUTER PATTERNS ===============================
      displayOuterPattern() {
          // we want random color to increase the diversity of the outer patterns
         let baseColor, patCol;
@@ -615,7 +631,7 @@ class Circle {
 }
 
 // =====================================================================
-// ======================= PRELOAD =====================================
+// ========================== PRELOAD ==================================
 // =====================================================================
 function preload() {
     if (SONG_LIST.length > 0) {
@@ -626,7 +642,7 @@ function preload() {
 }
 
 // =====================================================================
-// ======================= SETUP =======================================
+// ============================ SETUP ==================================
 // =====================================================================
 function setup() {
     // Use min dimension to ensure square aspect ratio fits screen
@@ -738,7 +754,7 @@ function playNextSong() {
 }
 
 // =====================================================================
-// ======================= DRAW ========================================
+// =========================== DRAW ====================================
 // =====================================================================
 function draw() {
     background(globalBgColor); 
@@ -757,6 +773,11 @@ function draw() {
         
         if (currentSong && currentSong.isPlaying()) {
             let spectrum = fft.analyze();
+
+            // External DSP-style extension:
+            // Use Nyquist frequency and spectrum length to map a target frequency band (C–B ranges)
+            // to FFT bin indices, so we can approximate the energy of each musical note.
+            //Referenc: https://sangarshanan.com/2024/11/05/visualising-music/
             let nyquist = 22050;
             let binSize = nyquist / spectrum.length;
             
