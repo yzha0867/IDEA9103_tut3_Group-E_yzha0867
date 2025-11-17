@@ -13,7 +13,6 @@ The album combines synthesizers, tribal percussion, and didgeridoo-like textures
 ---
 
 
-
 ## 2. How to Interact with the Artwork
 
 Click the **Play** button and wait for the music to start.  
@@ -27,6 +26,7 @@ No additional input is required - once the music is playing, you can sit back an
 
 My individual prototype modifies the group work by introducing an **audio-driven animation system** using `p5.FFT` and `p5.Amplitude` from the p5.sound library.
 
+- All circles still use the group's layered pattern system (outer / middle / inner rings).  
 - Seven specific circles are designated as **note circles**.  
 - Each note circle is mapped to a musical note in the fourth octave (C4–B4), using approximate frequency ranges (e.g. C ≈ 261.63 Hz, A ≈ 440 Hz).  
 - During playback of tracks from *Dreamtime Return*, the sketch analyses the current audio spectrum in real time and calculates the energy in each note’s frequency band.  
