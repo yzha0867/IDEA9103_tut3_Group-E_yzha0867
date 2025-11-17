@@ -61,17 +61,19 @@ function drawHandDrawnCircle(r, fillCol, strokeCol, strokeW) {
 The following techniques were not taught in the lecture/tutorial and come from external references or original experimentation:
 
 - **Note‑frequency mapping (C–B ranges)**  
-  Derived from external music theory resources and Wikipedia’s piano frequency tables.  
-  *Used so that each visual element corresponds to a meaningful musical pitch range, making the animation musically grounded.*
+    Derived from external music theory resources and Wikipedia’s piano frequency tables.  
+    *Used so that each visual element corresponds to a meaningful musical pitch range, making the animation musically grounded.*
 
 - **Multi‑layer glow effect (`drawGlowEffect`)**  
-  The glow rendering technique was developed with guidance from ChatGPT.  
+    The glow rendering technique was developed with guidance from ChatGPT.
+    *Used to make the “note circles” feel luminous and alive, matching the dream‑like quality of the music.*
+
   The assistant explained how to simulate a soft radial glow by:
     - Drawing multiple semi‑transparent ellipses of increasing radius  
     - Reducing alpha per layer to create a smooth falloff  
     - Introducing slight colour shifts for depth  
     - Placing a bright “core” layer at the centre  
-  *Used to make the “note circles” feel luminous and alive, matching the dream‑like quality of the music.*
+ 
 
 - **Hand‑drawn / sketch‑style circles (`beginShape()` + `curveVertex()`)**  
   Adapted from p5.js reference examples to create organic, uneven outlines.  
