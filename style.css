@@ -1,14 +1,9 @@
 html, body {
-  /* Set margin and padding to 0 to remove default browser spacing, ensuring the canvas can use the full window size */
   margin: 0;
   padding: 0;
-  /* Use flexbox display to facilitate centre alignment of content both horizontally and vertically */
   display: flex;
-  /* Align items vertically to the centre of the container */
   align-items: center;
-  /* Centre content horizontally within the body */
   justify-content: center; 
-  /* Set the colour to black to match the canvas */
   background-color: black;
 }
 
@@ -23,6 +18,7 @@ button {
     padding: 10px 20px;
     
     /* Visual Style */
+    background-color: #654321; 
     border: none;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
@@ -34,84 +30,19 @@ button {
     transition: all 0.3s ease;
 }
 
-/* Play/Pause Button (Center) - ✅ Now matches Prev/Next style */
-#playButton {
-    background-color: #654321;  /* Darker brown - matching prev/next */
-    padding: 10px 20px;
-}
-
-#playButton:hover {
+button:hover {
     background-color: #7D5A2F;
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
     transform: translateY(-2px);
 }
 
-#playButton:active {
+button:active {
     background-color: #4A3116;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     transform: translateY(0);
 }
 
-#playButton:focus {
+button:focus {
     outline: 2px solid #FFD700;
     outline-offset: 2px;
 }
-
-/* Previous Button (Left) */
-#prevButton {
-    background-color: #654321;  /* Darker brown */
-    padding: 10px 20px;
-}
-
-#prevButton:hover {
-    background-color: #7D5A2F;
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
-    transform: translateY(-2px);
-}
-
-#prevButton:active {
-    background-color: #4A3116;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transform: translateY(0);
-}
-
-#prevButton:focus {
-    outline: 2px solid #FFD700;
-    outline-offset: 2px;
-}
-
-/* Next Button (Right) */
-#nextButton {
-    background-color: #654321;  /* Darker brown */
-    padding: 10px 20px;
-}
-
-#nextButton:hover {
-    background-color: #7D5A2F;
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
-    transform: translateY(-2px);
-}
-
-#nextButton:active {
-    background-color: #4A3116;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transform: translateY(0);
-}
-
-#nextButton:focus {
-    outline: 2px solid #FFD700;
-    outline-offset: 2px;
-}
-
-/* Disabled state for all buttons */
-button:disabled {
-    background-color: #3A2618;
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-button:disabled:hover {
-    transform: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-

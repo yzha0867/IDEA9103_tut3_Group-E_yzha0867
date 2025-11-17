@@ -242,8 +242,6 @@ class Circle {
         this.middlePatternColor = random(patternPalette);
         this.innerBaseColor = random(circleBasePalette);
         this.innerPatternColor = random(patternPalette);
-
-        this.irregularity = 0.02;
         
         this.isNoteCircle = false;
         this.noteName = '';
